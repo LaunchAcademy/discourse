@@ -40,8 +40,15 @@ Discourse::Application.configure do
   #   :authentication       => 'plain',
   #   :enable_starttls_auto => true  }
 
-  config.action_mailer.delivery_method = :sendmail
-  config.action_mailer.sendmail_settings = {arguments: '-i'}
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings = {
+    :port => '587',
+    :address => 'smtp.mandrillapp.com',
+    :user_name => ENV['MANDRILL_USERNAME'],
+    :password => ENV['MANDRILL_APIKEY'],
+    :domain => 'heroku.com',
+    :authentication => :plain
+  }
 
   # Send deprecation notices to registered listeners
   config.active_support.deprecation = :notify
