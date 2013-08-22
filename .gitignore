@@ -20,6 +20,7 @@ dump.rdb
 /cache
 /coverage/*
 
+public/assets/*
 
 config/database.yml
 
