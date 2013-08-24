@@ -1,8 +1,9 @@
 class GithubOrganizationMemberAuthenticator
   ORGANIZATION = ENV['GITHUB_ORGANIZATION']
 
-  def initialize(access_token)
+ def initialize(access_token, username)
     @access_token = access_token
+    @username = username
   end
 
   def authenticate
@@ -11,7 +12,7 @@ class GithubOrganizationMemberAuthenticator
 
   private
   def organizations
-    @organizations = client.organizations
+    @organizations = client.organizations(@username)
   end
 
   def organization_logins
