@@ -318,7 +318,7 @@ class Users::OmniauthCallbacksController < ApplicationController
       email_valid: true
     }
 
-    if is_valid_github_organization_member?(access_token)
+    if is_valid_github_organization_member?(access_token, github_screen_name)
       user_info = GithubUserInfo.where(github_user_id: github_user_id).first
 
       if !user_info && user = User.find_by_email(email)
