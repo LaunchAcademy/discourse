@@ -377,8 +377,8 @@ class Users::OmniauthCallbacksController < ApplicationController
 
   private
 
-  def is_valid_github_organization_member?(access_token)
-    authenticator = ::GithubOrganizationMemberAuthenticator.new(access_token)
+  def is_valid_github_organization_member?(access_token, screen_name)
+    authenticator = ::GithubOrganizationMemberAuthenticator.new(access_token, screen_name)
     authenticator.authenticate
   end
 
