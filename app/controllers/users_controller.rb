@@ -7,7 +7,7 @@ class UsersController < ApplicationController
   skip_before_filter :authorize_mini_profiler, only: [:avatar]
   skip_before_filter :check_xhr, only: [:show, :password_reset, :update, :activate_account, :authorize_email, :user_preferences_redirect, :avatar]
 
-  before_filter :ensure_logged_in, only: [:username, :update, :change_email, :user_preferences_redirect]
+  before_filter :ensure_logged_in, only: [:username, :update, :change_email, :user_preferences_redirect, :upload_avatar, :toggle_avatar]
 
   # we need to allow account creation with bad CSRF tokens, if people are caching, the CSRF token on the
   #  page is going to be empty, this means that server will see an invalid CSRF and blow the session
@@ -162,11 +162,7 @@ class UsersController < ApplicationController
 
     user = User.new_from_params(params)
     auth = authenticate_user(user, params)
-
-    if user.valid? && SiteSetting.call_discourse_hub?
-      DiscourseHub.register_nickname(user.username, user.email)
-    end
-
+    register_nickname(user)
 
     if user.save
       activator = UserActivator.new(user, session, cookies)
@@ -346,13 +342,18 @@ class UsersController < ApplicationController
 
     upload = Upload.create_for(user.id, file, filesize)
 
+    user.uploaded_avatar_template = nil
     user.uploaded_avatar = upload
     user.use_uploaded_avatar = true
     user.save!
 
     Jobs.enqueue(:generate_avatars, upload_id: upload.id)
 
-    render json: { url: upload.url }
+    render json: {
+      url: upload.url,
+      width: upload.width,
+      height: upload.height,
+    }
 
   rescue FastImage::ImageFetchFailure
     render status: 422, text: I18n.t("upload.images.fetch_failure")
@@ -456,5 +457,11 @@ class UsersController < ApplicationController
     def oauth2_auth?(auth)
       auth[:oauth2].is_a?(Hash) && auth[:oauth2][:provider] && auth[:oauth2][:uid] &&
       Oauth2UserInfo.where(provider: auth[:oauth2][:provider], uid: auth[:oauth2][:uid]).empty?
+    end
+
+    def register_nickname(user)
+      if user.valid? && SiteSetting.call_discourse_hub?
+        DiscourseHub.register_nickname(user.username, user.email)
+      end
     end
 end

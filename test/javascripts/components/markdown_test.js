@@ -17,6 +17,7 @@ var cookedOptions = function(input, opts, expected, text) {
 
 test("basic cooking", function() {
   cooked("hello", "<p>hello</p>", "surrounds text with paragraphs");
+  cooked("***hello***", "<p><strong><em>hello</em></strong></p>", "it can do bold and italics at once.");
 });
 
 test("Line Breaks", function() {
@@ -115,7 +116,10 @@ test("Quotes", function() {
 });
 
 test("Mentions", function() {
-  cookedOptions("Hello @sam", { mentionLookup: (function() { return true; }) },
+
+  var alwaysTrue = { mentionLookup: (function() { return true; }) };
+
+  cookedOptions("Hello @sam", alwaysTrue,
                 "<p>Hello <a class=\"mention\" href=\"/users/sam\">@sam</a></p>",
                 "translates mentions to links");
 
@@ -160,6 +164,10 @@ test("Mentions", function() {
   cooked("1. this is  a list\n\n2. this is an @eviltrout mention\n",
          "<ol><li><p>this is  a list</p></li><li><p>this is an <span class=\"mention\">@eviltrout</span> mention  </p></li></ol>",
          "it mentions properly in a list.");
+
+  cookedOptions("@eviltrout", alwaysTrue,
+                "<p><a class=\"mention\" href=\"/users/eviltrout\">@eviltrout</a></p>",
+                "it doesn't onebox mentions");
 
 });
 
@@ -216,6 +224,10 @@ test("Code Blocks", function() {
   cooked("    ```\n    hello\n    ```",
          "<pre><code>&#x60;&#x60;&#x60;\nhello\n&#x60;&#x60;&#x60;</code></pre>",
          "only detect ``` at the begining of lines");
+
+  cooked("```ruby\ndef self.parse(text)\n\n  text\nend\n```",
+         "<p><pre><code class=\"ruby\">def self.parse(text)\n\n  text\nend</code></pre></p>",
+         "it allows leading spaces on lines in a code block.");
 });
 
 test("SanitizeHTML", function() {
