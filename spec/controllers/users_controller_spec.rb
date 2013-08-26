@@ -374,29 +374,13 @@ describe UsersController do
           SiteSetting.expects(:must_approve_users).returns(true)
         end
 
-        it 'should create twitter user info if none exists' do
+        it 'should create twitter user info if required' do
+          SiteSetting.stubs(:enable_twitter_logins?).returns(true)
           twitter_auth = { twitter_user_id: 42, twitter_screen_name: "bruce" }
-          session[:authentication] = twitter_auth
-          TwitterUserInfo.expects(:find_by_twitter_user_id).returns(nil)
+          auth = session[:authentication] = {}
+          auth[:authenticator_name] = 'twitter'
+          auth[:extra_data] = twitter_auth
           TwitterUserInfo.expects(:create)
-
-          post_user
-        end
-
-        it 'should create facebook user info if none exists' do
-          fb_auth = { facebook: { facebook_user_id: 42} }
-          session[:authentication] = fb_auth
-          FacebookUserInfo.expects(:find_by_facebook_user_id).returns(nil)
-          FacebookUserInfo.expects(:create!)
-
-          post_user
-        end
-
-        it 'should create github user info if none exists' do
-          gh_auth = { github_user_id: 2, github_screen_name: "bruce" }
-          session[:authentication] = gh_auth
-          GithubUserInfo.expects(:find_by_github_user_id).returns(nil)
-          GithubUserInfo.expects(:create)
 
           post_user
         end
@@ -487,6 +471,21 @@ describe UsersController do
 
     context 'when password param is missing' do
       let(:create_params) { {name: @user.name, username: @user.username, email: @user.email} }
+      include_examples 'failed signup'
+    end
+
+    context 'when nickname is unavailable in DiscourseHub' do
+      before do
+        SiteSetting.stubs(:call_discourse_hub?).returns(true)
+        DiscourseHub.stubs(:register_nickname).raises(DiscourseHub::NicknameUnavailable)
+      end
+      let(:create_params) {{
+        name: @user.name,
+        username: @user.username,
+        password: 'strongpassword',
+        email: @user.email
+      }}
+
       include_examples 'failed signup'
     end
 
