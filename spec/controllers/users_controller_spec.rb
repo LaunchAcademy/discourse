@@ -477,7 +477,7 @@ describe UsersController do
     context 'when nickname is unavailable in DiscourseHub' do
       before do
         SiteSetting.stubs(:call_discourse_hub?).returns(true)
-        DiscourseHub.stubs(:register_nickname).raises(DiscourseHub::NicknameUnavailable)
+        DiscourseHub.stubs(:register_nickname).raises(DiscourseHub::NicknameUnavailable.new(@user.name))
       end
       let(:create_params) {{
         name: @user.name,
@@ -979,14 +979,11 @@ describe UsersController do
         user.uploaded_avatar.id.should == upload.id
         # automatically set "use_uploaded_avatar"
         user.use_uploaded_avatar.should == true
-      end
-
-      it 'returns the url, width and height of the uploaded image' do
-        xhr :post, :upload_avatar, username: user.username, file: avatar
+        # returns the url, width and height of the uploaded image
         json = JSON.parse(response.body)
-        json['url'].should_not be_nil
-        json['width'].should == 244
-        json['height'].should == 66
+        json['url'].should == "/uploads/default/1/1234567890123456.jpg"
+        json['width'].should == 100
+        json['height'].should == 200
       end
 
     end
