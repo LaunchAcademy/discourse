@@ -23,6 +23,7 @@ test("basic cooking", function() {
   cooked("_trout_", "<p><em>trout</em></p>", "it italicizes text.");
   cooked("***hello***", "<p><strong><em>hello</em></strong></p>", "it can do bold and italics at once.");
   cooked("word_with_underscores", "<p>word_with_underscores</p>", "it doesn't do intraword italics");
+  cooked("common/_special_font_face.html.erb", "<p>common/_special_font_face.html.erb</p>", "it doesn't intraword with a slash");
   cooked("hello \\*evil\\*", "<p>hello *evil*</p>", "it supports escaping of asterisks");
   cooked("hello \\_evil\\_", "<p>hello _evil_</p>", "it supports escaping of italics");
   cooked("brussel sproutes are *awful*.", "<p>brussel sproutes are <em>awful</em>.</p>", "it doesn't swallow periods.");
@@ -118,6 +119,12 @@ test("simple quotes", function() {
   cooked("> level 1\n>  > level 2",
          "<blockquote><p>level 1</p><blockquote><p>level 2</p></blockquote></blockquote>",
          "it allows nesting of blockquotes with spaces");
+
+  cooked("- hello\n\n  > world\n  > eviltrout",
+         "<ul><li>hello</li></ul>\n\n<blockquote><p>world<br>eviltrout</p></blockquote>",
+         "it allows quotes within a list.");
+  cooked("  > indent 1\n  > indent 2", "<blockquote><p>indent 1<br>indent 2</p></blockquote>", "allow multiple spaces to indent");
+
 });
 
 test("Quotes", function() {
@@ -209,6 +216,11 @@ test("Oneboxing", function() {
   ok(matches("http://test.com", /onebox/), "adds a onebox class to a link on its own line");
   ok(matches("http://test.com\nhttp://test2.com", /onebox[\s\S]+onebox/m), "supports multiple links");
   ok(!matches("http://test.com bob", /onebox/), "doesn't onebox links that have trailing text");
+
+  ok(!matches("[Tom Cruise](http://www.tomcruise.com/)", "onebox"), "Markdown links with labels are not oneboxed");
+  ok(matches("[http://www.tomcruise.com/](http://www.tomcruise.com/)",
+    "onebox"),
+    "Markdown links where the label is the same as the url are oneboxed");
 
   cooked("http://en.wikipedia.org/wiki/Homicide:_Life_on_the_Street",
          "<p><a href=\"http://en.wikipedia.org/wiki/Homicide:_Life_on_the_Street\" class=\"onebox\"" +
