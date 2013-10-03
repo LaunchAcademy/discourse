@@ -13,7 +13,12 @@ Discourse.ShareView = Discourse.View.extend({
 
   title: function() {
     if (this.get('controller.type') === 'topic') return I18n.t('share.topic');
-    return I18n.t('share.post', {postNumber: this.get('controller.postNumber')});
+    var postNumber = this.get('controller.postNumber');
+    if (postNumber) {
+      return I18n.t('share.post', {postNumber: this.get('controller.postNumber')});
+    } else {
+      return I18n.t('share.topic');
+    }
   }.property('controller.type', 'controller.postNumber'),
 
   hasLink: function() {
@@ -40,7 +45,7 @@ Discourse.ShareView = Discourse.View.extend({
       // link is clicked (which is a click event) while the share dialog is showing.
       if (shareView.$().has(e.target).length !== 0) { return; }
 
-      shareView.get('controller').close();
+      shareView.get('controller').send('close');
       return true;
     });
 
@@ -71,7 +76,7 @@ Discourse.ShareView = Discourse.View.extend({
 
     $('html').on('keydown.share-view', function(e){
       if (e.keyCode === 27) {
-        shareView.get('controller').close();
+        shareView.get('controller').send('close');
       }
     });
   },

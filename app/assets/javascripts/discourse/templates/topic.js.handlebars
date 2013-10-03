@@ -125,8 +125,13 @@
 </div>
 
 {{render share}}
-{{render quoteButton}}
+{{render posterExpansion}}
+
+{{#if currentUser.enable_quoting}}
+  {{render quoteButton}}
+{{/if}}
 
 {{#if currentUser.staff}}
   {{render topicAdminMenu content}}
 {{/if}}
+

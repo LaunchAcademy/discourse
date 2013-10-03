@@ -94,6 +94,8 @@ de:
     links: Links
     faq: "FAQ"
     privacy_policy: "Datenschutzrichtlinie"
+    mobile_view: "Mobilansicht"
+    desktop_view: "Desktopansicht"
     you: "Du"
     or: "oder"
     now: "gerade eben"
@@ -202,6 +204,12 @@ de:
       change: "ändern"
       moderator: "{{user}} ist Moderator"
       admin: "{{user}} ist Administrator"
+      deleted: "(gelöscht)"
+
+      messages:
+        all: "Alle"
+        mine: "Meine"
+        unread: "Ungelesen"
 
       change_password:
         success: "(Mail gesendet)"
@@ -365,6 +373,7 @@ de:
     private_message_info:
       title: "Privates Gespräch"
       invite: "Andere einladen..."
+      remove_allowed_user: "Willst du {{name}} wirklich aus diesem Gespräch entfernen?"
 
     email: 'Mail'
     username: 'Benutzername'
@@ -549,7 +558,7 @@ de:
 
     topics:
       none:
-        favorited: "Du hast noch keine Themen favorisierst. Um ein Thema zu favorisieren, klicke auf den Stern neben dem Titel."
+        favorited: "Du hast noch keine Themen favorisiert. Um ein Thema zu favorisieren, klicke auf den Stern neben dem Titel."
         unread: "Du hast alle Themen gelesen."
         new: "Es gibt für dich keine neuen Themen."
         read: "Du hast bislang keine Themen gelesen."
@@ -811,6 +820,12 @@ de:
         undelete: "Diesen Beitrag wiederherstellen"
         share: "Link zu diesem Beitrag teilen"
         more: "Mehr"
+        delete_replies:
+          confirm:
+            one: "Willst du diese Direktantwort löschen?"
+            other: "Willst du die {{count}} Direktantworten auch löschen?"
+          yes_value: "Ja, auch die Antworten löschen"
+          no_value: "Nein, nur diesen Beitrag löschen"
 
       actions:
         flag: 'Melden'

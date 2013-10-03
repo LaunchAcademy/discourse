@@ -35,6 +35,7 @@ class User < ActiveRecord::Base
   has_one :github_user_info, dependent: :destroy
   has_one :cas_user_info, dependent: :destroy
   has_one :oauth2_user_info, dependent: :destroy
+  has_one :user_stat, dependent: :destroy
   belongs_to :approved_by, class_name: 'User'
 
   has_many :group_users, dependent: :destroy
@@ -60,6 +61,7 @@ class User < ActiveRecord::Base
   after_save :update_tracked_topics
 
   after_create :create_email_token
+  after_create :create_user_stat
 
   before_destroy do
     # These tables don't have primary keys, so destroying them with activerecord is tricky:
@@ -158,6 +160,9 @@ class User < ActiveRecord::Base
     key
   end
 
+  def created_topic_count
+    topics.count
+  end
 
   # tricky, we need our bus to be subscribed from the right spot
   def sync_notification_channel_position
@@ -300,14 +305,15 @@ class User < ActiveRecord::Base
     template.gsub("{size}", "45")
   end
 
+  # the avatars might take a while to generate
+  # so return the url of the original image in the meantime
+  def uploaded_avatar_path
+    return unless SiteSetting.allow_uploaded_avatars? && use_uploaded_avatar
+    uploaded_avatar_template.present? ? uploaded_avatar_template : uploaded_avatar.try(:url)
+  end
+
   def avatar_template
-    if SiteSetting.allow_uploaded_avatars? && use_uploaded_avatar
-      # the avatars might take a while to generate
-      # so return the url of the original image in the meantime
-      uploaded_avatar_template.present? ? uploaded_avatar_template : uploaded_avatar.try(:url)
-    else
-      User.gravatar_template(email)
-    end
+    uploaded_avatar_path || User.gravatar_template(email)
   end
 
   # Updates the denormalized view counts for all users
@@ -323,12 +329,13 @@ class User < ActiveRecord::Base
             (SELECT v.user_id,
                     COUNT(DISTINCT parent_id) AS c
              FROM views AS v
-             WHERE parent_type = 'Topic'
+             WHERE parent_type = 'Topic' AND v.user_id IN (
+                SELECT u1.id FROM users u1 where u1.last_seen_at > :seen_at
+             )
              GROUP BY v.user_id) AS X
             WHERE
                     X.user_id = users.id AND
-                    X.c <> topics_entered AND
-                    users.last_seen_at > :seen_at
+                    X.c <> topics_entered
     ", seen_at: 1.hour.ago
 
     # Update denormalzied posts_read_count
@@ -337,10 +344,12 @@ class User < ActiveRecord::Base
               (SELECT pt.user_id,
                       COUNT(*) AS c
                FROM post_timings AS pt
+               WHERE pt.user_id IN (
+                  SELECT u1.id FROM users u1 where u1.last_seen_at > :seen_at
+               )
                GROUP BY pt.user_id) AS X
                WHERE X.user_id = users.id AND
-                     X.c <> posts_read_count AND
-                     users.last_seen_at > :seen_at
+                     X.c <> posts_read_count
     ", seen_at: 1.hour.ago
   end
 
@@ -491,13 +500,14 @@ class User < ActiveRecord::Base
   end
 
   def secure_category_ids
-    cats = self.staff? ? Category.select(:id).where(read_restricted: true) : secure_categories.select('categories.id').references(:categories)
-    cats.map { |c| c.id }.sort
+    cats = self.staff? ? Category.where(read_restricted: true) : secure_categories.references(:categories)
+    cats.pluck('categories.id').sort
   end
 
   def topic_create_allowed_category_ids
     Category.topic_create_allowed(self.id).select(:id)
   end
+
 
   # Flag all posts from a user as spam
   def flag_linked_posts_as_spam
@@ -535,6 +545,12 @@ class User < ActiveRecord::Base
       TopicUser.where(where_conditions).update_all(["notification_level = CASE WHEN total_msecs_viewed < ? THEN ? ELSE ? END",
                             auto_track_topics_after_msecs, TopicUser.notification_levels[:regular], TopicUser.notification_levels[:tracking]])
     end
+  end
+
+  def create_user_stat
+    stat = UserStat.new
+    stat.user_id = self.id
+    stat.save!
   end
 
   def create_email_token
