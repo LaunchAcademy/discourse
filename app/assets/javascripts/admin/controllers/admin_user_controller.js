@@ -9,18 +9,25 @@
 Discourse.AdminUserController = Discourse.ObjectController.extend({
   editingTitle: false,
 
-  toggleTitleEdit: function() {
-    this.set('editingTitle', !this.editingTitle);
-  },
+  showApproval: function() {
+    return Discourse.SiteSettings.must_approve_users;
+  }.property(),
 
-  saveTitle: function() {
-    Discourse.ajax("/users/" + this.get('username').toLowerCase(), {
-      data: {title: this.get('title')},
-      type: 'PUT'
-    }).then(null, function(e){
-      bootbox.alert(I18n.t("generic_error_with_reason", {error: "http: " + e.status + " - " + e.body}));
-    });
+  actions: {
+    toggleTitleEdit: function() {
+      this.toggleProperty('editingTitle');
+    },
 
-    this.toggleTitleEdit();
+    saveTitle: function() {
+      Discourse.ajax("/users/" + this.get('username').toLowerCase(), {
+        data: {title: this.get('title')},
+        type: 'PUT'
+      }).then(null, function(e){
+        bootbox.alert(I18n.t("generic_error_with_reason", {error: "http: " + e.status + " - " + e.body}));
+      });
+
+      this.send('toggleTitleEdit');
+    }
   }
+
 });

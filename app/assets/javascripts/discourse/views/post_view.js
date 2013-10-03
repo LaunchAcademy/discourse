@@ -6,7 +6,7 @@
   @namespace Discourse
   @module Discourse
 **/
-Discourse.PostView = Discourse.GroupedView.extend({
+Discourse.PostView = Discourse.GroupedView.extend(Ember.Evented, {
   classNames: ['topic-post', 'clearfix'],
   templateName: 'post',
   classNameBindings: ['postTypeClass',
@@ -135,6 +135,39 @@ Discourse.PostView = Discourse.GroupedView.extend({
     }
   },
 
+  /**
+    Toggle the replies this post is a reply to
+
+    @method showReplyHistory
+  **/
+  toggleReplyHistory: function(post) {
+
+    var replyHistory = post.get('replyHistory'),
+        topicController = this.get('controller'),
+        origScrollTop = $(window).scrollTop();
+
+
+    if (replyHistory.length > 0) {
+      var origHeight = this.$('.embedded-posts.top').height();
+
+      replyHistory.clear();
+      Em.run.next(function() {
+        $(window).scrollTop(origScrollTop - origHeight);
+      });
+    } else {
+      post.set('loadingReplyHistory', true);
+
+      var self = this;
+      topicController.get('postStream').findReplyHistory(post).then(function () {
+        post.set('loadingReplyHistory', false);
+
+        Em.run.next(function() {
+          $(window).scrollTop(origScrollTop + self.$('.embedded-posts.top').height());
+        });
+      });
+    }
+  },
+
   // Add the quote controls to a post
   insertQuoteControls: function() {
     var postView = this;
@@ -160,8 +193,9 @@ Discourse.PostView = Discourse.GroupedView.extend({
   },
 
   didInsertElement: function() {
-    var $post = this.$();
-    var post = this.get('post');
+    var $post = this.$(),
+        post = this.get('post');
+
     this.showLinkCounts();
 
     // Track this post
@@ -170,6 +204,8 @@ Discourse.PostView = Discourse.GroupedView.extend({
     // Add syntax highlighting
     Discourse.SyntaxHighlighting.apply($post);
     Discourse.Lightbox.apply($post);
+
+    this.trigger('postViewInserted', $post);
 
     // Find all the quotes
     this.insertQuoteControls();

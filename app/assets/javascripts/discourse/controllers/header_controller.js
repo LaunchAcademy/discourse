@@ -10,12 +10,6 @@ Discourse.HeaderController = Discourse.Controller.extend({
   topic: null,
   showExtraInfo: null,
 
-  toggleStar: function() {
-    var topic = this.get('topic');
-    if (topic) topic.toggleStar();
-    return false;
-  },
-
   categories: function() {
     return Discourse.Category.list();
   }.property(),
@@ -25,15 +19,27 @@ Discourse.HeaderController = Discourse.Controller.extend({
   }.property('topic.isPrivateMessage'),
 
   mobileDevice: function() {
-    return Discourse.Session.currentProp('mobileDevice');
+    return Discourse.Mobile.isMobileDevice;
   }.property(),
 
   mobileView: function() {
-    return Discourse.Session.currentProp('mobileView');
+    return Discourse.Mobile.mobileView;
   }.property(),
 
-  toggleMobileView: function() {
-    window.location.assign(window.location.pathname + '?mobile_view=' + (Discourse.Session.currentProp('mobileView') ? '0' : '1'));
+  showMobileToggle: function() {
+    return Discourse.SiteSettings.enable_mobile_theme;
+  }.property(),
+
+  actions: {
+    toggleStar: function() {
+      var topic = this.get('topic');
+      if (topic) topic.toggleStar();
+      return false;
+    },
+
+    toggleMobileView: function() {
+      Discourse.Mobile.toggleMobileView();
+    }
   }
 
 });

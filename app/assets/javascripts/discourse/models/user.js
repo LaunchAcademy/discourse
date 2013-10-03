@@ -150,6 +150,7 @@ Discourse.User = Discourse.Model.extend({
                                'name',
                                'email_digests',
                                'email_direct',
+                               'email_always',
                                'email_private_messages',
                                'dynamic_favicon',
                                'digest_after_days',
@@ -258,7 +259,6 @@ Discourse.User = Discourse.Model.extend({
         json.user.invited_by = Discourse.User.create(json.user.invited_by);
       }
 
-
       user.setProperties(json.user);
       return user;
     });
@@ -276,12 +276,36 @@ Discourse.User = Discourse.Model.extend({
       type: 'PUT',
       data: { use_uploaded_avatar: useUploadedAvatar }
     });
+  },
+
+  /**
+    Determines whether the current user is allowed to upload a file.
+
+    @method isAllowedToUploadAFile
+    @param {string} type The type of the upload (image, attachment)
+    @returns true if the current user is allowed to upload a file
+  **/
+  isAllowedToUploadAFile: function(type) {
+    return this.get('staff') ||
+           this.get('trust_level') > 0 ||
+           Discourse.SiteSettings['newuser_max_' + type + 's'] > 0;
   }
 
 });
 
 Discourse.User.reopenClass(Discourse.Singleton, {
 
+
+  /**
+    Find a `Discourse.User` for a given username.
+
+    @method findByUsername
+    @returns {Promise} a promise that resolves to a `Discourse.User`
+  **/
+  findByUsername: function(username) {
+    var user = Discourse.User.create({username: username});
+    return user.findDetails();
+  },
 
   /**
     The current singleton will retrieve its attributes from the `PreloadStore`
@@ -310,7 +334,6 @@ Discourse.User.reopenClass(Discourse.Singleton, {
       discourseUserClass.currentUser = null;
     });
   },
-
 
   /**
     Checks if given username is valid for this email address

@@ -33,7 +33,7 @@ GIT
 
 GIT
   remote: git://github.com/rails/rails.git
-  revision: 025b63db308fbbf942a3bc2673d4aadab968c524
+  revision: 08376d3796482fefcd03ad1d7e0bcce0df4c9913
   branch: 4-0-stable
   specs:
     actionmailer (4.0.0)
@@ -90,12 +90,26 @@ GIT
       rake-compiler
 
 GIT
+  remote: https://github.com/MiniProfiler/rack-mini-profiler.git
+  revision: e08b751091a41f0066a1b28bd4e2b9b3480a1c1b
+  specs:
+    rack-mini-profiler (0.1.31)
+      rack (>= 1.1.3)
+
+GIT
   remote: https://github.com/SamSaffron/annotate_models.git
   revision: ebe4ba7e3f6ceeb43e4e40078da2b261a1bb71b2
   specs:
     annotate (2.6.0.beta1)
       activerecord (>= 2.3.0)
       rake (>= 0.8.7)
+
+GIT
+  remote: https://github.com/SamSaffron/flamegraph.git
+  revision: 07bd0ffdfd352e2fceb4edaf281990ba99156355
+  specs:
+    flamegraph (0.0.5)
+      fast_stack
 
 GIT
   remote: https://github.com/SamSaffron/message_bus
@@ -173,7 +187,7 @@ GEM
       activesupport
       builder
     arel (4.0.0)
-    atomic (1.1.13)
+    atomic (1.1.14)
     barber (0.4.2)
       ember-source
       execjs
@@ -214,6 +228,9 @@ GEM
     faraday (0.8.7)
       multipart-post (~> 1.1)
     fast_blank (0.0.1)
+      rake
+      rake-compiler
+    fast_stack (0.1.0)
       rake
       rake-compiler
     fast_xs (0.8.0)
@@ -273,7 +290,7 @@ GEM
     mocha (0.14.0)
       metaclass (~> 0.0.1)
     mock_redis (0.8.1)
-    multi_json (1.7.9)
+    multi_json (1.8.0)
     multipart-post (1.2.0)
     mustache (0.99.4)
     net-scp (1.1.2)
@@ -336,8 +353,6 @@ GEM
       rack (>= 0.4)
     rack-cors (0.2.8)
       rack
-    rack-mini-profiler (0.1.31)
-      rack (>= 1.1.3)
     rack-openid (1.3.1)
       rack (>= 1.1.0)
       ruby-openid (>= 2.1.8)
@@ -442,7 +457,7 @@ GEM
       eventmachine (>= 0.12.6)
       rack (>= 1.0.0)
     thor (0.18.1)
-    thread_safe (0.1.2)
+    thread_safe (0.1.3)
       atomic
     tilt (1.4.1)
     timecop (0.6.2.2)
@@ -484,6 +499,7 @@ DEPENDENCIES
   fast_xor!
   fast_xs
   fastimage
+  flamegraph!
   fog
   handlebars-source (= 1.0.12)
   highline
@@ -517,7 +533,7 @@ DEPENDENCIES
   qunit-rails
   rack-cache
   rack-cors
-  rack-mini-profiler
+  rack-mini-profiler!
   rails!
   rails-observers
   rails_multisite!
