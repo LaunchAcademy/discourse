@@ -9,13 +9,13 @@ Discourse::Application.configure do
   config.action_controller.perform_caching = true
 
   # Disable Rails's static asset server (Apache or nginx will already do this)
-  config.serve_static_assets = false
+  config.serve_static_assets = true
 
   # Compress JavaScripts and CSS
   config.assets.compress = true
 
   # stuff should be pre-compiled
-  config.assets.compile = false
+  config.assets.compile = true
 
   # Generate digests for assets URLs
   config.assets.digest = true
@@ -40,7 +40,6 @@ Discourse::Application.configure do
   #   :authentication       => 'plain',
   #   :enable_starttls_auto => true  }
 
-  config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
     :port => '587',
     :address => 'smtp.mandrillapp.com',
@@ -49,6 +48,9 @@ Discourse::Application.configure do
     :domain => 'heroku.com',
     :authentication => :plain
   }
+
+  config.action_mailer.delivery_method = :smtp
+  # config.action_mailer.sendmail_settings = {arguments: '-i'}
 
   # Send deprecation notices to registered listeners
   config.active_support.deprecation = :notify
@@ -72,5 +74,10 @@ Discourse::Application.configure do
   # Discourse strongly recommend you use a CDN.
   # For origin pull cdns all you need to do is register an account and configure
   # config.action_controller.asset_host = "http://YOUR_CDN_HERE"
+
+  # a comma delimited list of emails your devs have
+  # developers have god like rights and may impersonate anyone in the system
+  # normal admins may only impersonate other moderators (not admins)
+  config.developer_emails = []
 
 end
