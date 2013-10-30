@@ -118,6 +118,7 @@ gem 'therubyracer', require: 'v8'
 gem 'thin', require: false
 gem 'diffy', '>= 3.0', require: false
 gem 'highline', require: false
+gem 'rack-protection' # security
 
 # Gem that enables support for plugins. It is required.
 gem 'discourse_plugin', path: 'vendor/gems/discourse_plugin'
@@ -147,13 +148,9 @@ end
 
 group :test, :development do
   gem 'mock_redis'
-  gem 'listen', require: false
+  gem 'listen', '0.7.3', require: false
   gem 'certified', require: false
-  if rails4?
-    gem 'fabrication', github: 'paulelliott/fabrication', require: false
-  else
-    gem 'fabrication', require: false
-  end
+  gem 'fabrication', require: false
   gem 'qunit-rails'
   gem 'mocha', require: false
   gem 'rb-fsevent', require: RUBY_PLATFORM =~ /darwin/i ? 'rb-fsevent' : false
@@ -194,10 +191,6 @@ gem 'flamegraph', git: 'https://github.com/SamSaffron/flamegraph.git', require: 
 gem 'rack-mini-profiler',  git: 'https://github.com/MiniProfiler/rack-mini-profiler.git', require: false
 
 # used for caching, optional
-# redis-rack-cache is missing a sane expiry policy, it hogs redis
-# https://github.com/jodosha/redis-store/pull/183
-gem 'redis-rack-cache', git: 'https://github.com/SamSaffron/redis-rack-cache.git', require: false
-gem 'rack-cache', require: false
 gem 'rack-cors', require: false
 gem 'unicorn', require: false
 gem 'puma', require: false

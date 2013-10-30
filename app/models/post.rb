@@ -34,6 +34,8 @@ class Post < ActiveRecord::Base
 
   has_one :post_search_data
 
+  has_many :post_details
+
   validates_with ::Validators::PostValidator
 
   # We can pass several creating options to a post via attributes
@@ -56,6 +58,17 @@ class Post < ActiveRecord::Base
     @types ||= Enum.new(:regular, :moderator_action)
   end
 
+  def self.find_by_detail(key, value)
+    includes(:post_details).where( "post_details.key = ? AND " +
+                                   "post_details.value = ?",
+                                   key,
+                                   value ).first
+  end
+
+  def add_detail(key, value, extra = nil)
+    post_details.build(key: key, value: value, extra: extra)
+  end
+
   def limit_posts_per_day
     if user.created_at > 1.day.ago && post_number > 1
       RateLimiter.new(user, "first-day-replies-per-day:#{Date.today.to_s}", SiteSetting.max_replies_in_first_day, 1.day.to_i)
@@ -71,6 +84,9 @@ class Post < ActiveRecord::Base
     super
     update_flagged_posts_count
     TopicLink.extract_from(self)
+    if topic && topic.category_id && topic.category
+      topic.category.update_latest
+    end
   end
 
   # The key we use in redis to ensure unique posts
@@ -111,7 +127,6 @@ class Post < ActiveRecord::Base
   def cook(*args)
     Plugin::Filter.apply(:after_post_cook, self, post_analyzer.cook(*args))
   end
-
 
   # Sometimes the post is being edited by someone else, for example, a mod.
   # If that's the case, they should not be bound by the original poster's

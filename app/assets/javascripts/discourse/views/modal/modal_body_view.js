@@ -12,11 +12,6 @@ Discourse.ModalBodyView = Discourse.View.extend({
   didInsertElement: function() {
     $('#discourse-modal').modal('show');
 
-    var controller = this.get('controller');
-    $('#discourse-modal').on('hide.discourse', function() {
-      controller.send('closeModal');
-    });
-
     $('#modal-alert').hide();
 
     if (!Discourse.Mobile.mobileView) {
@@ -30,16 +25,6 @@ Discourse.ModalBodyView = Discourse.View.extend({
     if (title) {
       this.set('controller.controllers.modal.title', title);
     }
-  },
-
-  willDestroyElement: function() {
-    $('#discourse-modal').off('hide.discourse');
-  },
-
-  // Pass the errors to our errors view
-  displayErrors: function(errors, callback) {
-    this.set('parentView.parentView.modalErrorsView.errors', errors);
-    if (typeof callback === "function") callback();
   },
 
   flashMessageChanged: function() {

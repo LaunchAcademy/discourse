@@ -797,7 +797,6 @@ nb_NO:
       none: '(no category)'
       edit: 'rediger'
       edit_long: "Rediger Kategori"
-      edit_uncategorized: "Rediger Ukategorisert"
       view: 'Se Emner i Kategori'
       general: 'Generellt'
       settings: 'Innstillinger'
@@ -916,7 +915,6 @@ nb_NO:
 
   # This section is exported to the javascript for i18n in the admin section
   admin_js:
-    type_to_filter: "skriv for å filtrere..."
 
     admin:
       title: 'Discourse Admin'

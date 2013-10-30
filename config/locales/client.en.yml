@@ -88,6 +88,7 @@ en:
     log_in: "Log In"
     age: "Age"
     last_post: "Last Post"
+    joined: "Joined"
     admin_title: "Admin"
     flags_title: "Flags"
     show_more: "show more"
@@ -181,6 +182,16 @@ en:
       "11": "Edits"
       "12": "Sent Items"
       "13": "Inbox"
+
+    categories:
+      all: "all categories"
+      all_subcategories: "all subcategories"
+      category: "Category"
+      posts: "Posts"
+      topics: "Topics"
+      latest: "Latest"
+      latest_by: "latest by"
+      toggle_ordering: "toggle ordering control"
 
     user:
       said: "{{username}} said:"
@@ -482,8 +493,8 @@ en:
       link_optional_text: "optional title"
       quote_title: "Blockquote"
       quote_text: "Blockquote"
-      code_title: "Code Sample"
-      code_text: "enter code here"
+      code_title: "Preformatted text"
+      code_text: "enter preformatted text here"
       upload_title: "Upload"
       upload_description: "enter upload description here"
       olist_title: "Numbered List"
@@ -583,6 +594,12 @@ en:
       private_message: 'Start a private message'
       list: 'Topics'
       new: 'new topic'
+      new_topics:
+        one: '1 new topic'
+        other: '{{count}} new topics'
+      unread_topics:
+        one: '1 unread topic'
+        other: '{{count}} unread topics'
       title: 'Topic'
       loading_more: "Loading more Topics..."
       loading: 'Loading topic...'
@@ -746,7 +763,7 @@ en:
       split_topic:
         title: "Move to New Topic"
         action: "move to new topic"
-        topic_name: "New Topic Name:"
+        topic_name: "New Topic Name"
         error: "There was an error moving posts to the new topic."
         instructions:
           one: "You are about to create a new topic and populate it with the post you've selected."
@@ -930,7 +947,6 @@ en:
       choose: 'Select a category&hellip;'
       edit: 'edit'
       edit_long: "Edit Category"
-      edit_uncategorized: "Edit Uncategorized"
       view: 'View Topics in Category'
       general: 'General'
       settings: 'Settings'
@@ -959,6 +975,9 @@ en:
       auto_close_label: "Auto-close topics after:"
       edit_permissions: "Edit Permissions"
       add_permission: "Add Permission"
+      this_year: "this year"
+      position: "position"
+      parent: "Parent Category"
 
     flagging:
       title: 'Why are you flagging this post?'
@@ -966,7 +985,7 @@ en:
       take_action: "Take Action"
       notify_action: 'Notify'
       delete_spammer: "Delete Spammer"
-      delete_confirm: "You are about to delete <b>%{posts}</b> posts and <b>%{topics}</b> topics from this user, remove their account, and add their email address <b>%{email}</b> to a permanent block list. Are you sure this user is really a spammer?"
+      delete_confirm: "You are about to delete <b>%{posts}</b> posts and <b>%{topics}</b> topics from this user, remove their account, block signups from their IP address <b>%{ip_address}</b>, and add their email address <b>%{email}</b> to a permanent block list. Are you sure this user is really a spammer?"
       yes_delete_spammer: "Yes, Delete Spammer"
       cant: "Sorry, you can't flag this post at this time."
       custom_placeholder_notify_user: "Why does this post require you to speak to this user directly and privately? Be specific, be constructive, and always be kind."
@@ -1056,7 +1075,7 @@ en:
 
   # This section is exported to the javascript for i18n in the admin section
   admin_js:
-    type_to_filter: "type to filter..."
+    filter: "filter"
 
     admin:
       title: 'Discourse Admin'
@@ -1152,12 +1171,18 @@ en:
         delete_failed: "Unable to delete group. If this is an automatic group, it cannot be destroyed."
 
       api:
+        generate_master: "Generate Master API Key"
+        none: "There are no active API keys right now."
+        user: "User"
         title: "API"
-        long_title: "API Information"
-        key: "Key"
-        generate: "Generate API Key"
-        regenerate: "Regenerate API Key"
+        key: "API Key"
+        generate: "Generate"
+        regenerate: "Regenerate"
+        revoke: "Revoke"
+        confirm_regen: "Are you sure you want to replace that API Key with a new one?"
+        confirm_revoke: "Are you sure you want to revoke that key?"
         info_html: "Your API key will allow you to create and update topics using JSON calls."
+        all_users: "All Users"
         note_html: "Keep this key <strong>secret</strong>, all users that have it may create arbitrary posts on the forum as any user."
 
       customize:
@@ -1206,6 +1231,9 @@ en:
         last_match_at: "Last Matched"
         match_count: "Matches"
         ip_address: "IP"
+        delete: 'Delete'
+        edit: 'Edit'
+        save: 'Save'
         screened_actions:
           block: "block"
           do_nothing: "do nothing"
@@ -1240,6 +1268,17 @@ en:
           title: "Screened URLs"
           description: "The URLs listed here were used in posts by users who have been identified as spammers."
           url: "URL"
+        screened_ips:
+          title: "Screened IPs"
+          description: 'IP addresses that are being watched. Use "Allow" to whitelist IP addresses.'
+          delete_confirm: "Are you sure you want to remove the rule for %{ip_address}?"
+          actions:
+            block: "Block"
+            do_nothing: "Allow"
+          form:
+            label: "New:"
+            ip_address: "IP address"
+            add: "Add"
 
       impersonate:
         title: "Impersonate User"
@@ -1335,8 +1374,8 @@ en:
           one: "Users can't be deleted if they registered more than %{count} day ago, or if they have posts. Delete all posts before trying to delete a user."
           other: "Users can't be deleted if they registered more than %{count} days ago, or if they have posts. Delete all posts before trying to delete a user."
         delete_confirm: "Are you SURE you want to delete this user? This action is permanent!"
-        delete_and_block: "<b>Yes</b>, and <b>block</b> signups from this email address"
-        delete_dont_block: "<b>Yes</b>, but <b>allow</b> signups from this email address"
+        delete_and_block: "<b>Yes</b>, and <b>block</b> signups from this email and IP address"
+        delete_dont_block: "<b>Yes</b>, but <b>allow</b> signups from this email and IP address"
         deleted: "The user was deleted."
         delete_failed: "There was an error deleting that user. Make sure all posts are deleted before trying to delete the user."
         send_activation_email: "Send Activation Email"

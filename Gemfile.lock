@@ -55,14 +55,6 @@ GIT
       thin
 
 GIT
-  remote: https://github.com/SamSaffron/redis-rack-cache.git
-  revision: 379ef30e31d4e185cb1d7f8badca0cc06403eba2
-  specs:
-    redis-rack-cache (1.2.1)
-      rack-cache (~> 1.2)
-      redis-store (~> 1.1.0)
-
-GIT
   remote: https://github.com/SamSaffron/sprockets.git
   revision: bacf2ec4d4d10cd8d1ab25a6360740314c512237
   branch: rails-compat
@@ -508,7 +500,7 @@ DEPENDENCIES
   image_optim
   image_sorcery
   librarian (>= 0.0.25)
-  listen
+  listen (= 0.7.3)
   lru_redux
   message_bus!
   minitest
@@ -533,9 +525,9 @@ DEPENDENCIES
   pry-rails
   puma
   qunit-rails
-  rack-cache
   rack-cors
   rack-mini-profiler!
+  rack-protection
   rails (= 3.2.12)
   rails_multisite!
   rake
@@ -543,7 +535,6 @@ DEPENDENCIES
   rb-inotify (~> 0.9)
   redcarpet
   redis
-  redis-rack-cache!
   redis-rails
   rest-client
   rinku

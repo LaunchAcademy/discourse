@@ -171,8 +171,6 @@ describe Topic do
         topic.fancy_title.should == "&ldquo;this topic&rdquo; &ndash; has &ldquo;fancy stuff&rdquo;"
       end
     end
-
-
   end
 
   context 'category validation' do
@@ -182,9 +180,14 @@ describe Topic do
       end
 
       it "does not allow nil category" do
-        topic = Fabricate(:topic, category: nil)
+        topic = Fabricate.build(:topic, category: nil)
         topic.should_not be_valid
         topic.errors[:category_id].should be_present
+      end
+
+      it "allows PMs" do
+        topic = Fabricate.build(:topic, category: nil, archetype: Archetype.private_message)
+        topic.should be_valid
       end
 
       it 'passes for topics with a category' do
@@ -796,7 +799,7 @@ describe Topic do
     describe 'without a previous category' do
 
       it 'should not change the topic_count when not changed' do
-       lambda { @topic.change_category(nil); @category.reload }.should_not change(@category, :topic_count)
+       lambda { @topic.change_category(@topic.category.name); @category.reload }.should_not change(@category, :topic_count)
       end
 
       describe 'changed category' do
@@ -812,10 +815,9 @@ describe Topic do
 
       end
 
-
       it "doesn't change the category when it can't be found" do
         @topic.change_category('made up')
-        @topic.category.should be_blank
+        @topic.category_id.should == SiteSetting.uncategorized_category_id
       end
     end
 
@@ -876,7 +878,7 @@ describe Topic do
         end
 
         it "resets the category" do
-          @topic.category_id.should be_blank
+          @topic.category_id.should == SiteSetting.uncategorized_category_id
           @category.topic_count.should == 0
         end
       end
@@ -955,7 +957,7 @@ describe Topic do
         it "ignores the category's default auto-close" do
           Timecop.freeze(Time.zone.now) do
             Jobs.expects(:enqueue_at).with(7.days.from_now, :close_topic, all_of( has_key(:topic_id), has_key(:user_id) ))
-            Fabricate(:topic, auto_close_days: 7, user: Fabricate(:admin), category: Fabricate(:category, auto_close_days: 2))
+            Fabricate(:topic, auto_close_days: 7, user: Fabricate(:admin), category_id: Fabricate(:category, auto_close_days: 2).id)
           end
         end
 
@@ -1206,5 +1208,24 @@ describe Topic do
     lambda {
       create_post(user: user, topic_id: topic_id)
     }.should raise_exception
+  end
+
+  describe ".count_exceeds_minimun?" do
+    before { SiteSetting.stubs(:minimum_topics_similar).returns(20) }
+
+    context "when Topic count is geater than minimum_topics_similar" do
+      it "should be true" do
+        Topic.stubs(:count).returns(30)
+        expect(Topic.count_exceeds_minimum?).to be_true
+      end
+    end
+
+    context "when topic's count is less than minimum_topics_similar" do
+      it "should be false" do
+        Topic.stubs(:count).returns(10)
+        expect(Topic.count_exceeds_minimum?).to_not be_true
+      end
+    end
+
   end
 end

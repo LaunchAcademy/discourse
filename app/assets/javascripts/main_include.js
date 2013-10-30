@@ -4,7 +4,6 @@
 //= require LAB.js
 //= require Markdown.Converter.js
 //= require Markdown.Editor.js
-//= require Markdown.Sanitizer.js
 //= require better_markdown.js
 //= require bootbox.js
 //= require bootstrap-alert.js
@@ -26,6 +25,7 @@
 //= require jquery.putcursoratend.js
 //= require jquery.tagsinput.js
 //= require jquery.ui.widget.js
+//= require jquery.sortable.js
 //= require lodash.js
 //= require md5.js
 //= require modernizr.custom.95264.js
@@ -43,10 +43,11 @@
 // Stuff we need to load first
 //= require ./discourse/mixins/scrolling
 //= require_tree ./discourse/mixins
-//= require ./discourse/components/computed
+//= require ./discourse/lib/markdown
+//= require ./discourse/lib/computed
 //= require ./discourse/views/view
 //= require ./discourse/views/container_view
-//= require ./discourse/components/debounce
+//= require ./discourse/lib/debounce
 //= require ./discourse/models/model
 //= require ./discourse/models/user_action
 //= require ./discourse/models/composer
@@ -62,9 +63,10 @@
 //= require ./discourse/dialects/dialect
 //= require_tree ./discourse/dialects
 //= require_tree ./discourse/controllers
-//= require_tree ./discourse/components
+//= require_tree ./discourse/lib
 //= require_tree ./discourse/models
 //= require_tree ./discourse/views
+//= require_tree ./discourse/components
 //= require_tree ./discourse/helpers
 //= require_tree ./discourse/templates
 //= require_tree ./discourse/routes

@@ -13,8 +13,15 @@ Discourse.EditCategoryController = Discourse.ObjectController.extend(Discourse.M
   settingsSelected: Ember.computed.equal('selectedTab', 'settings'),
   foregroundColors: ['FFFFFF', '000000'],
 
+  parentCategories: function() {
+    return Discourse.Category.list().filter(function (c) {
+      return !c.get('parentCategory');
+    });
+  }.property(),
+
   onShow: function() {
     this.changeSize();
+    this.titleChanged();
   },
 
   changeSize: function() {
@@ -29,9 +36,6 @@ Discourse.EditCategoryController = Discourse.ObjectController.extend(Discourse.M
     if (this.get('id')) {
       return I18n.t("category.edit_long") + " : " + this.get('model.name');
     }
-    if (this.get('isUncategorized')){
-      return I18n.t("category.edit_uncategorized");
-    }
     return I18n.t("category.create") + (this.get('model.name') ? (" : " + this.get('model.name')) : '');
   }.property('id', 'model.name'),
 
@@ -44,7 +48,7 @@ Discourse.EditCategoryController = Discourse.ObjectController.extend(Discourse.M
     if (!this.get('name')) return true;
     if (!this.get('color')) return true;
     return false;
-  }.property('name', 'color', 'deleting'),
+  }.property('saving', 'name', 'color', 'deleting'),
 
   deleteVisible: function() {
     return (this.get('id') && this.get('topic_count') === 0);
@@ -124,61 +128,56 @@ Discourse.EditCategoryController = Discourse.ObjectController.extend(Discourse.M
     },
 
     saveCategory: function() {
-      var categoryController = this;
+      var self = this,
+          model = this.get('model'),
+          parentCategory = Discourse.Category.list().findBy('id', parseInt(model.get('parent_category_id'), 10));
+
       this.set('saving', true);
+      model.set('parentCategory', parentCategory);
+      var newSlug = Discourse.Category.slugFor(this.get('model'));
 
+      this.get('model').save().then(function(result) {
+        // success
+        self.send('closeModal');
+        Discourse.URL.redirectTo("/category/" + newSlug);
+      }, function(error) {
 
-      if( this.get('isUncategorized') ) {
-        $.when(
-          Discourse.SiteSetting.update('uncategorized_color', this.get('color')),
-          Discourse.SiteSetting.update('uncategorized_text_color', this.get('text_color')),
-          Discourse.SiteSetting.update('uncategorized_name', this.get('name'))
-        ).then(function(result) {
-          // success
-          categoryController.send('closeModal');
-          // We can't redirect to the uncategorized category on save because the slug
-          // might have changed.
-          Discourse.URL.redirectTo("/categories");
-        }, function(errors) {
-          // errors
-          if(errors.length === 0) errors.push(I18n.t("category.save_error"));
-          categoryController.displayErrors(errors);
-          categoryController.set('saving', false);
-        });
-      } else {
-        this.get('model').save().then(function(result) {
-          // success
-          categoryController.send('closeModal');
-          Discourse.URL.redirectTo("/category/" + Discourse.Category.slugFor(result.category));
-        }, function(errors) {
-          // errors
-          if(errors.length === 0) errors.push(I18n.t("category.creation_error"));
-          categoryController.displayErrors(errors);
-          categoryController.set('saving', false);
-        });
-      }
+        if (error && error.responseText) {
+          self.flash($.parseJSON(error.responseText).errors[0]);
+        } else {
+          self.flash(I18n.t('generic_error'));
+        }
+
+        self.set('saving', false);
+      });
     },
 
     deleteCategory: function() {
-      var categoryController = this;
+      var self = this;
       this.set('deleting', true);
 
-      $('#discourse-modal').modal('hide');
+      this.send('hideModal');
       bootbox.confirm(I18n.t("category.delete_confirm"), I18n.t("no_value"), I18n.t("yes_value"), function(result) {
         if (result) {
-          categoryController.get('model').destroy().then(function(){
+          self.get('model').destroy().then(function(){
             // success
-            categoryController.send('closeModal');
+            self.send('closeModal');
             Discourse.URL.redirectTo("/categories");
-          }, function(jqXHR){
-            // error
-            $('#discourse-modal').modal('show');
-            categoryController.displayErrors([I18n.t("category.delete_error")]);
-            categoryController.set('deleting', false);
+          }, function(error){
+
+            if (error && error.responseText) {
+              self.flash($.parseJSON(error.responseText).errors[0]);
+            } else {
+              self.flash(I18n.t('generic_error'));
+            }
+
+            self.send('showModal');
+            self.displayErrors([I18n.t("category.delete_error")]);
+            self.set('deleting', false);
           });
         } else {
-          $('#discourse-modal').modal('show');
-          categoryController.set('deleting', false);
+          self.send('showModal');
+          self.set('deleting', false);
         }
       });
     }

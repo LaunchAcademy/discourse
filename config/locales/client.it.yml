@@ -885,7 +885,6 @@ it:
       none: '(nessuna categoria)'
       edit: 'modifica'
       edit_long: "Modifica Categoria"
-      edit_uncategorized: "Modifica Non categorizzata"
       view: 'Mostra Topic nella Categoria'
       general: 'Generale'
       settings: 'Impostazioni'
@@ -1003,7 +1002,6 @@ it:
 
   # This section is exported to the javascript for i18n in the admin section
   admin_js:
-    type_to_filter: "scrivi per filtrare..."
 
     admin:
       title: 'Amministrazione Discourse'

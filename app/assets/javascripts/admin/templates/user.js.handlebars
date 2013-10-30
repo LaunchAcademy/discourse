@@ -39,7 +39,7 @@
     <div class='controls'>
       {{#if editingTitle}}
         <button class='btn' {{action saveTitle}}>{{i18n admin.user.save_title}}</button>
-        <a href="#" {{action toggleTitleEdit}}>Cancel</a>
+        <a href="#" {{action toggleTitleEdit}}>{{i18n cancel}}</a>
       {{else}}
         <button class='btn' {{action toggleTitleEdit}}>{{i18n admin.user.edit_title}}</button>
       {{/if}}
@@ -123,6 +123,25 @@
         {{/if}}
       {{/if}}
     </div>
+  </div>
+
+  <div class='display-row'>
+    <div class='field'>{{i18n admin.api.key}}</div>
+
+    {{#if api_key}}
+      <div class='long-value'>
+        {{api_key.key}}
+        <button class='btn' {{action regenerateApiKey}}>{{i18n admin.api.regenerate}}</button>
+        <button {{action revokeApiKey}} class="btn">{{i18n admin.api.revoke}}</button>
+      </div>
+    {{else}}
+      <div class='value'>
+      &mdash;
+      </div>
+      <div class='controls'>
+        <button {{action generateApiKey}} class="btn">{{i18n admin.api.generate}}</button>
+      </div>
+    {{/if}}
   </div>
 
   <div class='display-row'>

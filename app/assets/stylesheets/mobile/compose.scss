@@ -196,7 +196,7 @@ display: none;
       }
       .wmd-controls {
         @include transition(top 0.3s ease);
-        top: 100px;
+        top: 135px;
       }
     }
   }
@@ -235,7 +235,6 @@ display: none;
     }
     #reply-title {
       margin-right: 10px;
-      float: left;
       &:disabled {
         background-color: $light_gray;
       }
@@ -276,26 +275,24 @@ display: none;
       bottom: 8px;
     }
   }
-  .title-input, .category-input {
-    position: relative;
+  .category-input {
     display: inline;
   }
   .title-input .popup-tip {
-    width: 300px;
-    left: -8px;
-    margin-top: 8px;
+    width: 240px;
+    right: 5px;
   }
   .category-input .popup-tip {
     width: 240px;
-    left: 432px;
-    top: -7px;
+    right: 5px;
   }
-}
-.reply-to  {
-  margin-bottom: 10px;
-  position: absolute;
-  margin-right: 40px;
-
+  .textarea-wrapper .popup-tip {
+    top: 28px;
+  }
+  button.btn.no-text {
+    margin: 7px 0 0 5px;
+    position: absolute;
+  }
 }
 
 

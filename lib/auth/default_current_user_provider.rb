@@ -38,12 +38,19 @@ class Auth::DefaultCurrentUserProvider
 
     # possible we have an api call, impersonate
     unless current_user
-      if api_key = request["api_key"]
-        if api_username = request["api_username"]
-          if SiteSetting.api_key_valid?(api_key)
-            @env[API_KEY] = true
+      if api_key_value = request["api_key"]
+        api_key = ApiKey.where(key: api_key_value).includes(:user).first
+        if api_key.present?
+          @env[API_KEY] = true
+          api_username = request["api_username"]
+
+          if api_key.user.present?
+            raise Discourse::InvalidAccess.new if api_username && (api_key.user.username_lower != api_username.downcase)
+            current_user = api_key.user
+          elsif api_username
             current_user = User.where(username_lower: api_username.downcase).first
           end
+
         end
       end
     end
@@ -73,7 +80,7 @@ class Auth::DefaultCurrentUserProvider
 
   def has_auth_cookie?
     request = Rack::Request.new(@env)
-    cookie = request.cookies[CURRENT_USER_KEY]
+    cookie = request.cookies[TOKEN_COOKIE]
     !cookie.nil? && cookie.length == 32
   end
 end

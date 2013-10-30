@@ -925,7 +925,6 @@ de:
       none: '(keine Kategorie)'
       edit: 'Bearbeiten'
       edit_long: "Kategorie bearbeiten"
-      edit_uncategorized: "Unkategorisierte bearbeiten"
       view: 'Zeige Themen dieser Kategorie'
       general: 'Generell'
       settings: 'Einstellungen'
@@ -1051,7 +1050,6 @@ de:
 
   # This section is exported to the javascript for i18n in the admin section
   admin_js:
-    type_to_filter: "Tippe etwas ein, um zu filtern..."
 
     admin:
       title: 'Discourse Administrator'

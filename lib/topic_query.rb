@@ -7,7 +7,7 @@ require_dependency 'suggested_topics_builder'
 
 class TopicQuery
   # Could be rewritten to %i if Ruby 1.9 is no longer supported
-  VALID_OPTIONS = %w(except_topic_id exclude_category limit page per_page topic_ids visible).map(&:to_sym)
+  VALID_OPTIONS = %w(except_topic_id exclude_category limit page per_page topic_ids visible category).map(&:to_sym)
 
   class << self
     # use the constants in conjuction with COALESCE to determine the order with regard to pinned
@@ -50,7 +50,7 @@ class TopicQuery
     # If you've clearned the pin, use bumped_at, otherwise put it at the top
     def order_nocategory_with_pinned_sql
       "CASE
-        WHEN topics.category_id IS NULL and (COALESCE(topics.pinned_at, '#{lowest_date}') > COALESCE(tu.cleared_pinned_at, '#{lowest_date}'))
+        WHEN topics.category_id = #{SiteSetting.uncategorized_category_id.to_i} and (COALESCE(topics.pinned_at, '#{lowest_date}') > COALESCE(tu.cleared_pinned_at, '#{lowest_date}'))
           THEN '#{highest_date}'
         ELSE topics.bumped_at
        END DESC"
@@ -58,7 +58,7 @@ class TopicQuery
 
     # For anonymous users
     def order_nocategory_basic_bumped
-      "CASE WHEN topics.category_id IS NULL and (topics.pinned_at IS NOT NULL) THEN 0 ELSE 1 END, topics.bumped_at DESC"
+      "CASE WHEN topics.category_id = #{SiteSetting.uncategorized_category_id.to_i} and (topics.pinned_at IS NOT NULL) THEN 0 ELSE 1 END, topics.bumped_at DESC"
     end
 
     def order_basic_bumped
@@ -152,18 +152,6 @@ class TopicQuery
     TopicList.new(:private_messages, user, list)
   end
 
-  def list_uncategorized
-    create_list(:uncategorized, unordered: true) do |list|
-      list = list.where(category_id: nil)
-
-      if @user
-        list.order(TopicQuery.order_with_pinned_sql)
-      else
-        list.order(TopicQuery.order_nocategory_basic_bumped)
-      end
-    end
-  end
-
   def list_category(category)
     create_list(:category, unordered: true) do |list|
       list = list.where(category_id: category.id)
@@ -245,7 +233,7 @@ class TopicQuery
 
       result = result.listable_topics.includes(category: :topic_only_relative_url)
       result = result.where('categories.name is null or categories.name <> ?', options[:exclude_category]).references(:categories) if options[:exclude_category]
-      result = result.where('categories.name = ?', options[:only_category]).references(:categories) if options[:only_category]
+      result = result.where('categories.slug = ?', options[:category]).references(:categories) if options[:category].present?
       result = result.limit(options[:per_page]) unless options[:limit] == false
       result = result.visible if options[:visible] || @user.nil? || @user.regular?
       result = result.where('topics.id <> ?', options[:except_topic_id]).references(:topics) if options[:except_topic_id]

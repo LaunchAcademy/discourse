@@ -219,6 +219,7 @@ a.star {
     padding: 7px 14px;
     color: #000;
   }
+
   .information {
     border-top: 1px solid #d1d1d2;
   }
@@ -270,7 +271,7 @@ a.star {
     }
 
    .title {
-    font-size: 14px; line-height: 8px; 
+    font-size: 14px; line-height: 8px;
   }
 
 }
@@ -299,8 +300,14 @@ span.post-count {
   padding: 15px 10px 15px 10px;
 }
 
-.topic-post article.boxed img {
-  max-width: 100%;
+.topic-post {
+  article.boxed img {
+    max-width: 100%;
+    height: auto;
+  }
+  &.moderator {
+    background-color: #eef0ff;
+  }
 }
 
 .quote-button {
@@ -342,7 +349,7 @@ iframe {
 }
 
 .btn-group {
-  margin-top: 50px;
+  margin-top: 25px;
   position: relative;
 }
 
@@ -417,11 +424,16 @@ iframe {
   border-radius: 4px;
   padding: 4px;
   margin: -4px 0 0 -4px;
-  background-color: lighten(yellow, 35%);}
+  background-color: lighten(yellow, 35%);
+}
+
+h3.new-user a[href] {
+  color: $dark_gray;
+}
 
 .topic-meta-data {
-white-space: nowrap; 
-float: left;
+  white-space: nowrap;
+  float: left;
 }
 
 .user-title {
