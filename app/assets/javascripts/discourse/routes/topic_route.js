@@ -7,19 +7,17 @@
   @module Discourse
 **/
 Discourse.TopicRoute = Discourse.Route.extend({
-
   redirect: function() { Discourse.redirectIfLoginRequired(this); },
 
   actions: {
     // Modals that can pop up within a topic
-
     showPosterExpansion: function(post) {
       this.controllerFor('posterExpansion').show(post);
     },
 
     composePrivateMessage: function(user) {
       var self = this;
-      this.transitionTo('userPrivateMessages', user).then(function () {
+      this.transitionTo('userActivity', user).then(function () {
         self.controllerFor('userActivity').send('composePrivateMessage');
       });
     },
@@ -36,12 +34,7 @@ Discourse.TopicRoute = Discourse.Route.extend({
 
     showInvite: function() {
       Discourse.Route.showModal(this, 'invite', this.modelFor('topic'));
-      this.controllerFor('invite').setProperties({
-        email: null,
-        error: false,
-        saving: false,
-        finished: false
-      });
+      this.controllerFor('invite').reset();
     },
 
     showPrivateInvite: function() {
@@ -66,7 +59,17 @@ Discourse.TopicRoute = Discourse.Route.extend({
 
     splitTopic: function() {
       Discourse.Route.showModal(this, 'splitTopic', this.modelFor('topic'));
-    }
+    },
+
+    // Use replaceState to update the URL once it changes
+    postChangedRoute: Discourse.debounce(function(currentPost) {
+      var topic = this.modelFor('topic');
+      if (topic && currentPost) {
+        var postUrl = topic.get('url');
+        if (currentPost > 1) { postUrl += "/" + currentPost; }
+        Discourse.URL.replaceState(postUrl);
+      }
+    }, 1000)
 
   },
 

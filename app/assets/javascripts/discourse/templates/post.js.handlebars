@@ -21,6 +21,11 @@
         <div {{bindAttr class=":contents byTopicCreator:topic-creator :trigger-expansion"}}>
           <a href='{{unbound usernameUrl}}' {{action showPosterExpansion this}}>{{avatar this imageSize="large"}}</a>
           <h3 {{bindAttr class="staff new_user"}}><a href='{{unbound usernameUrl}}' {{action showPosterExpansion this}}>{{breakUp username}}</a></h3>
+
+          {{#if showName}}
+          <h3><a href='{{unbound usernameUrl}}' {{action showPosterExpansion this}}>{{breakUp name}}</a></h3>
+          {{/if}}
+
           {{#if user_title}}<div class="user-title" {{action showPosterExpansion this}}>{{user_title}}</div>{{/if}}
         </div>
       {{else}}
@@ -63,9 +68,9 @@
         <div class='cooked'>{{{cooked}}}</div>
         {{view Discourse.PostMenuView postBinding="this" postViewBinding="view"}}
       </div>
-      {{view Discourse.RepliesView contentBinding="replies" postViewBinding="view"}}
-      {{view Discourse.ActionsHistoryView postBinding="this"}}
-      {{view Discourse.TopicSummaryView postBinding="this"}}
+      {{view Discourse.RepliesView content=replies postView=view}}
+      {{discourse-action-history post=this}}
+      {{view Discourse.TopicMapContainerView post=this topic=controller.model}}
     </div>
 
     <div class='span5 gutter'>

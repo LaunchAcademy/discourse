@@ -2,10 +2,9 @@ require_dependency "auth/current_user_provider"
 
 class Auth::DefaultCurrentUserProvider
 
-  CURRENT_USER_KEY = "_DISCOURSE_CURRENT_USER"
-  API_KEY = "_DISCOURSE_API"
-
-  TOKEN_COOKIE = "_t"
+  CURRENT_USER_KEY ||= "_DISCOURSE_CURRENT_USER"
+  API_KEY ||= "_DISCOURSE_API"
+  TOKEN_COOKIE ||= "_t"
 
   # do all current user initialization here
   def initialize(env)
@@ -27,7 +26,7 @@ class Auth::DefaultCurrentUserProvider
       current_user = User.where(auth_token: auth_token).first
     end
 
-    if current_user && current_user.is_banned?
+    if current_user && current_user.suspended?
       current_user = nil
     end
 
@@ -64,7 +63,17 @@ class Auth::DefaultCurrentUserProvider
       user.save!
     end
     cookies.permanent[TOKEN_COOKIE] = { value: user.auth_token, httponly: true }
+    make_developer_admin(user)
     @env[CURRENT_USER_KEY] = user
+  end
+
+  def make_developer_admin(user)
+    if  user.active? &&
+        !user.admin &&
+        Rails.configuration.respond_to?(:developer_emails) &&
+        Rails.configuration.developer_emails.include?(user.email)
+      user.update_column(:admin, true)
+    end
   end
 
   def log_off_user(session, cookies)

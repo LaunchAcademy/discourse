@@ -712,7 +712,7 @@ describe Topic do
 
     it 'is a regular topic by default' do
       topic.archetype.should == Archetype.default
-      topic.has_best_of.should be_false
+      topic.has_summary.should be_false
       topic.percent_rank.should == 1.0
       topic.should be_visible
       topic.pinned_at.should be_blank
@@ -1051,9 +1051,35 @@ describe Topic do
           topic = Fabricate(:topic, category: Fabricate(:category, auto_close_days: 14), user: mod)
           Jobs.expects(:enqueue_at).with(12.hours.from_now, :close_topic, has_entries(topic_id: topic.id, user_id: topic.user_id))
           topic.auto_close_at = 12.hours.from_now
-          topic.save.should be_true
+          topic.save
+
+          topic.reload
+          topic.closed.should == false
+
+          Timecop.freeze(24.hours.from_now) do
+            Topic.auto_close
+            topic.reload
+            topic.closed.should == true
+          end
+
         end
       end
+    end
+  end
+
+  describe "auto_close_days=" do
+    subject(:topic) { Fabricate.build(:topic) }
+
+    it 'can take a number' do
+      Timecop.freeze(Time.zone.now) do
+        topic.auto_close_days = 2
+        topic.auto_close_at.should be_within_one_second_of(2.days.from_now)
+      end
+    end
+
+    it 'can take nil' do
+      topic.auto_close_days = nil
+      topic.auto_close_at.should be_nil
     end
   end
 
@@ -1064,10 +1090,53 @@ describe Topic do
 
     before { Discourse.stubs(:system_user).returns(admin) }
 
-    it 'sets auto_close_at' do
+    it 'can take a number of hours as an integer' do
       Timecop.freeze(Time.zone.now) do
-        topic.set_auto_close(3, admin)
+        topic.set_auto_close(72, admin)
         expect(topic.auto_close_at).to eq(3.days.from_now)
+      end
+    end
+
+    it 'can take a number of hours as a string' do
+      Timecop.freeze(Time.zone.now) do
+        topic.set_auto_close('18', admin)
+        expect(topic.auto_close_at).to eq(18.hours.from_now)
+      end
+    end
+
+    it "can take a time later in the day" do
+      Timecop.freeze(Time.zone.local(2013,11,20,8,0)) do
+        topic.set_auto_close('13:00', admin)
+        topic.auto_close_at.should == Time.zone.local(2013,11,20,13,0)
+      end
+    end
+
+    it "can take a time for the next day" do
+      Timecop.freeze(Time.zone.local(2013,11,20,8,0)) do
+        topic.set_auto_close('5:00', admin)
+        topic.auto_close_at.should == Time.zone.local(2013,11,21,5,0)
+      end
+    end
+
+    it "can take a timestamp for a future time" do
+      Timecop.freeze(Time.zone.local(2013,11,20,8,0)) do
+        topic.set_auto_close('2013-11-22 5:00', admin)
+        topic.auto_close_at.should == Time.zone.local(2013,11,22,5,0)
+      end
+    end
+
+    it "sets a validation error when given a timestamp in the past" do
+      Timecop.freeze(Time.zone.local(2013,11,20,8,0)) do
+        topic.set_auto_close('2013-11-19 5:00', admin)
+        topic.auto_close_at.should == Time.zone.local(2013,11,19,5,0)
+        topic.errors[:auto_close_at].should be_present
+      end
+    end
+
+    it "can take a timestamp with timezone" do
+      Timecop.freeze(Time.utc(2013,11,20,12,0)) do
+        topic.set_auto_close('2013-11-25T01:35:00-08:00', admin)
+        topic.auto_close_at.should == Time.utc(2013,11,25,9,35)
       end
     end
 
@@ -1092,20 +1161,20 @@ describe Topic do
       expect(staff_topic.auto_close_user_id).to eq(999)
     end
 
-    it 'clears auto_close_at if num_days is nil' do
+    it 'clears auto_close_at if arg is nil' do
       closing_topic.set_auto_close(nil)
       expect(closing_topic.auto_close_at).to be_nil
     end
 
-    it 'clears auto_close_started_at if num_days is nil' do
+    it 'clears auto_close_started_at if arg is nil' do
       closing_topic.set_auto_close(nil)
       expect(closing_topic.auto_close_started_at).to be_nil
     end
 
     it 'updates auto_close_at if it was already set to close' do
       Timecop.freeze(Time.zone.now) do
-        closing_topic.set_auto_close(14)
-        expect(closing_topic.auto_close_at).to eq(14.days.from_now)
+        closing_topic.set_auto_close(48)
+        expect(closing_topic.auto_close_at).to eq(2.days.from_now)
       end
     end
 
@@ -1114,6 +1183,25 @@ describe Topic do
         closing_topic.set_auto_close(14)
       }.to_not change(closing_topic, :auto_close_started_at)
     end
+  end
+
+  describe 'for_digest' do
+    let(:user) { Fabricate.build(:user) }
+
+    it "returns none when there are no topics" do
+      Topic.for_digest(user, 1.year.ago).should be_blank
+    end
+
+    it "doesn't return category topics" do
+      Fabricate(:category)
+      Topic.for_digest(user, 1.year.ago).should be_blank
+    end
+
+    it "returns regular topics" do
+      topic = Fabricate(:topic)
+      Topic.for_digest(user, 1.year.ago).should == [topic]
+    end
+
   end
 
   describe 'secured' do
@@ -1127,7 +1215,7 @@ describe Topic do
       # for_digest
 
       Topic.for_digest(Fabricate(:user), 1.year.ago).count.should == 0
-      Topic.for_digest(Fabricate(:admin), 1.year.ago).count.should == 2
+      Topic.for_digest(Fabricate(:admin), 1.year.ago).count.should == 1
     end
   end
 

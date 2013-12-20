@@ -45,9 +45,7 @@ Discourse.QuoteButtonController = Discourse.Controller.extend({
         cloned = range.cloneRange(),
         $ancestor = $(range.commonAncestorContainer);
 
-    // don't display the "quote reply" button if you select text spanning two posts
-    // note: the ".contents" is here to prevent selection of the topic summary
-    if ($ancestor.closest('.topic-body > .contents').length === 0) {
+    if ($ancestor.closest('.cooked').length === 0) {
       this.set('buffer', '');
       return;
     }
@@ -119,12 +117,11 @@ Discourse.QuoteButtonController = Discourse.Controller.extend({
 
     var buffer = this.get('buffer');
     var quotedText = Discourse.Quote.build(post, buffer);
-    if (composerController.get('content.replyDirty')) {
+    composerOpts.quote = quotedText;
+    if (composerController.get('content.viewOpen') || composerController.get('content.viewDraft')) {
       composerController.appendText(quotedText);
     } else {
-      composerController.open(composerOpts).then(function() {
-        composerController.appendText(quotedText);
-      });
+      composerController.open(composerOpts);
     }
     this.set('buffer', '');
     return false;

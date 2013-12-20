@@ -371,8 +371,7 @@ pt_BR:
     unmute: Reativar
     last_post: Último post
 
-    best_of:
-      title: "Melhor De"
+    summary:
       enabled_description: "Você está vendo somente as melhores postagens neste tópico. Para ver todas as postagens de novo clique abaixo."
       description: "Há <b>{{count}}</b> postagen neste tópico. Isso é muito! Gostaria de poupar tempo alterando a vista para mostrar apenas as postagens com mais interações e respostas?"
       enable: 'Alternar para visualização "Os Melhores"'
@@ -585,7 +584,6 @@ pt_BR:
 
     topic:
       filter_to: "Mostrar apenas os {{post_count}} de {{username}} neste tópico"
-      create_in: 'Criar Tópico sobre {{categoryName}}'
       create: 'Criar Tópico'
       create_long: 'Criar um novo Tópico'
       private_message: 'Começar uma nova conversa privada'
@@ -748,8 +746,8 @@ pt_BR:
           one: "feito por 1 usuário específico"
           other: "feito por {count}} usuários específicos"
 
-        best_of: "Você está vendo apenas {{n_best_posts}} {{of_n_posts}}."
-        n_best_posts:
+        summary: "Você está vendo apenas {{n_summarized_posts}} {{of_n_posts}}."
+        n_summarized_posts:
           one: "1 melhor postagem"
           other: "{{count}} melhores postagens"
         of_n_posts:
@@ -990,11 +988,10 @@ pt_BR:
         more: "{{n}} em falta..."
         left: "{{n}} restantes"
 
-    topic_summary:
+    topic_map:
       title: "Sumário do Tópico"
       links_shown: "mostrar todos os {{totalLinks}} links..."
       clicks: "clicks"
-      topic_link: "link do tópico"
 
     topic_statuses:
       locked:
@@ -1015,7 +1012,7 @@ pt_BR:
     activity: "Atividade"
     likes: "Curtidas"
     likes_long: "há {{number}} curtidas neste tópico"
-    top_contributors: "Participantes"
+    users: "Participantes"
     category_title: "Categoria"
     history: "Histórico"
     changed_by: "por {{author}}"
@@ -1070,6 +1067,7 @@ pt_BR:
 
   # Essa seção é para o javascript para i18n no admin
   admin_js:
+    type_to_filter: "escreva para filtrar..."
 
     admin:
       title: 'Discourse Admin'
@@ -1094,7 +1092,7 @@ pt_BR:
         moderators: 'Moderadores:'
         admins: 'Admins:'
         blocked: 'Bloqueado:'
-        banned: 'Banido:'
+        suspended: 'Banido:'
         private_messages_short: "MPs"
         private_messages_title: "Mensagens Particulares"
 
@@ -1273,7 +1271,7 @@ pt_BR:
           pending: "Pendentes"
           admins: 'Administradores'
           moderators: 'Moderadores'
-          banned: 'Banidos'
+          suspended: 'Banidos'
           blocked: 'Bloqueados'
         approved: "Aprovado?"
         approved_selected:
@@ -1294,7 +1292,7 @@ pt_BR:
           admins: 'Usuários Administradores'
           moderators: 'Moderadores'
           blocked: 'Usuários Boqueados'
-          banned: 'Usuários Banidos'
+          suspended: 'Usuários Banidos'
         reject_successful:
           one: "1 usuário rejeitado com sucesso."
           other: "%{count} usuários rejeitados com sucesso"
@@ -1303,14 +1301,14 @@ pt_BR:
           other: "Falha ao rejeitar %{count} usuários."
 
       user:
-        ban_failed: "Ocorreu um erro ao banir este usuário {{error}}"
-        unban_failed: "Ocorreu um erro ao desbanir este usuário {{error}}"
-        ban_duration: "Por quanto tempo gostaria de banir a pessoa? (dias)"
+        suspend_failed: "Ocorreu um erro ao banir este usuário {{error}}"
+        unsuspend_failed: "Ocorreu um erro ao desbanir este usuário {{error}}"
+        suspend_duration: "Por quanto tempo gostaria de banir a pessoa? (dias)"
         delete_all_posts: "Apagar todas postagens"
         delete_all_posts_confirm: "Você irá deletar %{posts} posts e %{topics} tópicos. Tem certeza?"
-        ban: "Banir"
-        unban: "Desbanir"
-        banned: "Banido?"
+        suspend: "Banir"
+        unsuspend: "Desbanir"
+        suspended: "Banido?"
         moderator: "Moderador?"
         admin: "Admin?"
         blocked: "Bloqueado?"

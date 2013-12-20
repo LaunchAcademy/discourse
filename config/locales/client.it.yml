@@ -361,12 +361,11 @@ it:
     unmute: Annulla ignora
     last_post: Ultimo post
 
-    best_of:
-      title: "Best Of"
-      enabled_description: Stai guardando il "Best Of" di questo topic.
+    summary:
+      enabled_description: Stai guardando il "Summary" di questo topic.
       description: "Ci sono <b>{{count}}</b> post in questo topic. Sono tanti! Vuoi risparmiare tempo leggendo solo i post con più interazioni e risposte?"
-      enable: 'Passa a "Best Of"'
-      disable: 'Annulla "Best Of"'
+      enable: 'Passa a "Summary"'
+      disable: 'Annulla "Summary"'
 
     private_message_info:
       title: "Conversazione Privata"
@@ -571,7 +570,6 @@ it:
       title: Dettaglio Classifica Topic
 
     topic:
-      create_in: 'Crea Topic in {{categoryName}}'
       create: 'Crea Topic'
       create_long: 'Crea un nuovo Topic'
       private_message: 'Inizia una conversazione privata'
@@ -706,8 +704,8 @@ it:
           one: "da 1 utente specifico"
           other: "da {{count}} utenti specifici"
 
-        best_of: "Stai vedendo i {{n_best_posts}} {{of_n_posts}}."
-        n_best_posts:
+        summary: "Stai vedendo i {{n_summarized_posts}} {{of_n_posts}}."
+        n_summarized_posts:
           one: "1 best post"
           other: "{{count}} best post"
         of_n_posts:
@@ -928,11 +926,10 @@ it:
         more: "ancora {{n}}..."
         left: "{{n}} rimanenti"
 
-    topic_summary:
+    topic_map:
       title: "Riepilogo del Topic"
       links_shown: "mostra tutti i {{totalLinks}} link..."
       clicks: "click"
-      topic_link: "topic link"
 
     topic_statuses:
       locked:
@@ -952,7 +949,7 @@ it:
     views_long: "questo topic è stato visto {{number}} volte"
     activity: "Attività"
     likes: "Like"
-    top_contributors: "Partecipanti"
+    users: "Partecipanti"
     category_title: "Categoria"
     history: "Cronologia"
     changed_by: "di {{author}}"
@@ -1002,6 +999,7 @@ it:
 
   # This section is exported to the javascript for i18n in the admin section
   admin_js:
+    type_to_filter: "scrivi per filtrare..."
 
     admin:
       title: 'Amministrazione Discourse'
@@ -1132,13 +1130,13 @@ it:
           moderators: 'Moderatori'
 
       user:
-        ban_failed: "Qualcosa è andato storto nel bannare questo utente {{error}}"
-        unban_failed: "Qualcosa è andato rimuovendo il ban a questo utente {{error}}"
-        ban_duration: "Per quanto tempo vuoi bannare l'utente? (giorni)"
+        suspend_failed: "Qualcosa è andato storto nel bannare questo utente {{error}}"
+        unsuspend_failed: "Qualcosa è andato rimuovendo il ban a questo utente {{error}}"
+        suspend_duration: "Per quanto tempo vuoi bannare l'utente? (giorni)"
         delete_all_posts: "Cancella tutti i post"
-        ban: "Ban"
-        unban: "Rimuovi Ban"
-        banned: "Bannato?"
+        suspend: "Ban"
+        unsuspend: "Rimuovi Ban"
+        suspended: "Bannato?"
         moderator: "Moderatore?"
         admin: "Amministratore?"
         show_admin_profile: "Amministratore"

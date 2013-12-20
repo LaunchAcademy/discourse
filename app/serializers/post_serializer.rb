@@ -1,13 +1,13 @@
 class PostSerializer < BasicPostSerializer
 
   # To pass in additional information we might need
-  attr_accessor :topic_slug
-  attr_accessor :topic_view
-  attr_accessor :parent_post
-  attr_accessor :add_raw
-  attr_accessor :single_post_link_counts
-  attr_accessor :draft_sequence
-  attr_accessor :post_actions
+  attr_accessor :topic_slug,
+                :topic_view,
+                :parent_post,
+                :add_raw,
+                :single_post_link_counts,
+                :draft_sequence,
+                :post_actions
 
   attributes :post_number,
              :post_type,
@@ -43,7 +43,8 @@ class PostSerializer < BasicPostSerializer
              :trust_level,
              :deleted_at,
              :deleted_by,
-             :user_deleted
+             :user_deleted,
+             :edit_reason
 
 
   def moderator?
@@ -112,7 +113,6 @@ class PostSerializer < BasicPostSerializer
   def reply_to_user
     {
       username: object.reply_to_user.username,
-      name: object.reply_to_user.name,
       avatar_template: object.reply_to_user.avatar_template
     }
   end
@@ -192,6 +192,10 @@ class PostSerializer < BasicPostSerializer
 
   def include_bookmarked?
     post_actions.present? && post_actions.keys.include?(PostActionType.types[:bookmark])
+  end
+
+  def include_display_username?
+    SiteSetting.enable_names?
   end
 
   private

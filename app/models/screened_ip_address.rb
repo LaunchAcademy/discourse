@@ -14,6 +14,18 @@ class ScreenedIpAddress < ActiveRecord::Base
     match_for_ip_address(ip_address) || create(opts.slice(:action_type).merge(ip_address: ip_address))
   end
 
+  # In Rails 4.0.0, validators are run to handle invalid assignments to inet columns (as they should).
+  # In Rails 4.0.1, an exception is raised before validation happens, so we need this hack for
+  # inet/cidr columns:
+  def ip_address=(val)
+    write_attribute(:ip_address, val)
+
+  # this gets even messier, Ruby 1.9.2 raised a different exception to Ruby 2.0.0
+  # handle both exceptions
+  rescue ArgumentError, IPAddr::InvalidAddressError
+    self.errors.add(:ip_address, :invalid)
+  end
+
   def self.match_for_ip_address(ip_address)
     # The <<= operator on inet columns means "is contained within or equal to".
     #

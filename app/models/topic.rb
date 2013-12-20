@@ -5,6 +5,7 @@ require_dependency 'rate_limiter'
 require_dependency 'text_sentinel'
 require_dependency 'text_cleaner'
 require_dependency 'trashable'
+require_dependency 'archetype'
 
 class Topic < ActiveRecord::Base
   include ActionView::Helpers::SanitizeHelper
@@ -145,7 +146,7 @@ class Topic < ActiveRecord::Base
     self.bumped_at ||= Time.now
     self.last_post_user_id ||= user_id
     if !@ignore_category_auto_close and self.category and self.category.auto_close_days and self.auto_close_at.nil?
-      set_auto_close(self.category.auto_close_days)
+      set_auto_close(self.category.auto_close_days * 24)
     end
   end
 
@@ -181,6 +182,14 @@ class Topic < ActiveRecord::Base
     if auto_close_at and (auto_close_at_changed? or auto_close_user_id_changed?)
       Jobs.enqueue_at(auto_close_at, :close_topic, {topic_id: id, user_id: auto_close_user_id || user_id})
     end
+  end
+
+  def self.top_viewed(max = 10)
+    Topic.listable_topics.visible.secured.order('views desc').limit(max)
+  end
+
+  def self.recent(max = 10)
+    Topic.listable_topics.visible.secured.order('created_at desc').limit(max)
   end
 
   def self.count_exceeds_minimum?
@@ -228,14 +237,21 @@ class Topic < ActiveRecord::Base
 
   # Returns hot topics since a date for display in email digest.
   def self.for_digest(user, since)
-    Topic
-      .visible
-      .secured(Guardian.new(user))
-      .where(closed: false, archived: false)
-      .created_since(since)
-      .listable_topics
-      .order(:percent_rank)
-      .limit(100)
+    topics = Topic
+              .visible
+              .secured(Guardian.new(user))
+              .where(closed: false, archived: false)
+              .created_since(since)
+              .listable_topics
+              .order(:percent_rank)
+              .limit(100)
+
+    category_topic_ids = Category.pluck(:topic_id).compact!
+    if category_topic_ids.present?
+      topics = topics.where("id NOT IN (?)", category_topic_ids)
+    end
+
+    topics
   end
 
   def update_meta_data(data)
@@ -443,28 +459,8 @@ class Topic < ActiveRecord::Base
     end
   end
 
-  # Invite a user by email and return the invite. Return the previously existing invite
-  # if already exists. Returns nil if the invite can't be created.
   def invite_by_email(invited_by, email)
-    lower_email = Email.downcase(email)
-    invite = Invite.with_deleted.where('invited_by_id = ? and email = ?', invited_by.id, lower_email).first
-
-    if invite.blank?
-      invite = Invite.create(invited_by: invited_by, email: lower_email)
-      unless invite.valid?
-
-        grant_permission_to_user(lower_email) if email_already_exists_for?(invite)
-
-        return
-      end
-    end
-
-    # Recover deleted invites if we invite them again
-    invite.recover if invite.deleted_at.present?
-
-    topic_invites.create(invite_id: invite.id)
-    Jobs.enqueue(:invite_email, invite_id: invite.id)
-    invite
+    Invite.invite_by_email(email, invited_by, self)
   end
 
   def email_already_exists_for?(invite)
@@ -606,15 +602,48 @@ class Topic < ActiveRecord::Base
     end
   end
 
+  # TODO: change this method, along with category's auto_close_days. Use hours.
   def auto_close_days=(num_days)
     @ignore_category_auto_close = true
-    set_auto_close(num_days)
+    set_auto_close( num_days ? num_days * 24 : nil)
   end
 
-  def set_auto_close(num_days, by_user=nil)
-    num_days = num_days.to_i
-    self.auto_close_at = (num_days > 0 ? num_days.days.from_now : nil)
-    if num_days > 0
+  def self.auto_close
+    Topic.where("NOT closed AND auto_close_at < ? AND auto_close_user_id IS NOT NULL", 5.minutes.from_now).each do |t|
+      t.auto_close
+    end
+  end
+
+  def auto_close(closer = nil)
+    if auto_close_at && !closed? && !deleted_at && auto_close_at < 5.minutes.from_now
+      closer ||= auto_close_user
+      if Guardian.new(closer).can_moderate?(self)
+        update_status('autoclosed', true, closer)
+      end
+    end
+  end
+
+  # Valid arguments for the auto close time:
+  #  * An integer, which is the number of hours from now to close the topic.
+  #  * A time, like "12:00", which is the time at which the topic will close in the current day
+  #    or the next day if that time has already passed today.
+  #  * A timestamp, like "2013-11-25 13:00", when the topic should close.
+  #  * A timestamp with timezone in JSON format. (e.g., "2013-11-26T21:00:00.000Z")
+  #  * nil, to prevent the topic from automatically closing.
+  def set_auto_close(arg, by_user=nil)
+    if arg.is_a?(String) and matches = /^([\d]{1,2}):([\d]{1,2})$/.match(arg.strip)
+      now = Time.zone.now
+      self.auto_close_at = Time.zone.local(now.year, now.month, now.day, matches[1].to_i, matches[2].to_i)
+      self.auto_close_at += 1.day if self.auto_close_at < now
+    elsif arg.is_a?(String) and arg.include?('-') and timestamp = Time.zone.parse(arg)
+      self.auto_close_at = timestamp
+      self.errors.add(:auto_close_at, :invalid) if timestamp < Time.zone.now
+    else
+      num_hours = arg.to_i
+      self.auto_close_at = (num_hours > 0 ? num_hours.hours.from_now : nil)
+    end
+
+    unless self.auto_close_at.nil?
       self.auto_close_started_at ||= Time.zone.now
       if by_user and by_user.staff?
         self.auto_close_user = by_user
@@ -681,7 +710,7 @@ end
 #  closed                  :boolean          default(FALSE), not null
 #  archived                :boolean          default(FALSE), not null
 #  bumped_at               :datetime         not null
-#  has_best_of             :boolean          default(FALSE), not null
+#  has_summary             :boolean          default(FALSE), not null
 #  meta_data               :hstore
 #  vote_count              :integer          default(0), not null
 #  archetype               :string(255)      default("regular"), not null

@@ -21,7 +21,11 @@ Discourse::Application.routes.draw do
   namespace :admin, constraints: StaffConstraint.new do
     get '' => 'admin#index'
 
-    resources :site_settings, constraints: AdminConstraint.new
+    resources :site_settings, constraints: AdminConstraint.new do
+      collection do
+        get 'category/:id' => 'site_settings#index'
+      end
+    end
 
     get 'reports/:type' => 'reports#show'
 
@@ -38,9 +42,9 @@ Discourse::Application.routes.draw do
         put 'approve-bulk' => 'users#approve_bulk'
         delete 'reject-bulk' => 'users#reject_bulk'
       end
-      put 'ban'
+      put 'suspend'
       put 'delete_all_posts'
-      put 'unban'
+      put 'unsuspend'
       put 'revoke_admin', constraints: AdminConstraint.new
       put 'grant_admin', constraints: AdminConstraint.new
       post 'generate_api_key', constraints: AdminConstraint.new
@@ -96,7 +100,7 @@ Discourse::Application.routes.draw do
         delete 'key' => 'api#revoke_key'
       end
     end
-  end
+  end # admin namespace
 
   get 'email_preferences' => 'email#preferences_redirect', :as => 'email_preferences_redirect'
   get 'email/unsubscribe/:key' => 'email#unsubscribe', as: 'email_unsubscribe'
@@ -236,8 +240,8 @@ Discourse::Application.routes.draw do
   get 't/:slug/:topic_id/wordpress' => 'topics#wordpress', constraints: {topic_id: /\d+/}
   get 't/:slug/:topic_id/moderator-liked' => 'topics#moderator_liked', constraints: {topic_id: /\d+/}
   get 't/:topic_id/wordpress' => 'topics#wordpress', constraints: {topic_id: /\d+/}
-  get 't/:slug/:topic_id/best_of' => 'topics#show', defaults: {best_of: true}, constraints: {topic_id: /\d+/, post_number: /\d+/}
-  get 't/:topic_id/best_of' => 'topics#show', constraints: {topic_id: /\d+/, post_number: /\d+/}
+  get 't/:slug/:topic_id/summary' => 'topics#show', defaults: {summary: true}, constraints: {topic_id: /\d+/, post_number: /\d+/}
+  get 't/:topic_id/summary' => 'topics#show', constraints: {topic_id: /\d+/, post_number: /\d+/}
   put 't/:slug/:topic_id' => 'topics#update', constraints: {topic_id: /\d+/}
   put 't/:slug/:topic_id/star' => 'topics#star', constraints: {topic_id: /\d+/}
   put 't/:topic_id/star' => 'topics#star', constraints: {topic_id: /\d+/}

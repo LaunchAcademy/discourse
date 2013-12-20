@@ -75,9 +75,12 @@ Discourse::Application.configure do
   # For origin pull cdns all you need to do is register an account and configure
   # config.action_controller.asset_host = "http://YOUR_CDN_HERE"
 
+<<<<<<< HEAD
   # a comma delimited list of emails your devs have
   # developers have god like rights and may impersonate anyone in the system
   # normal admins may only impersonate other moderators (not admins)
   config.developer_emails = []
 
+=======
+>>>>>>> heroku-upstream/master
 end

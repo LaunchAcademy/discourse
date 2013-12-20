@@ -177,20 +177,33 @@ describe PrettyText do
     end
   end
 
-  describe "apply cdn" do
-    it "should detect bare links to images and apply a CDN" do
-      PrettyText.apply_cdn("<a href='/hello.png'>hello</a><img src='/a.jpeg'>","http://a.com").should ==
-        "<a href=\"http://a.com/hello.png\">hello</a><img src=\"http://a.com/a.jpeg\">"
+  describe "make_all_links_absolute" do
+    let(:base_url) { "http://baseurl.net" }
+
+    before do
+      Discourse.stubs(:base_url).returns(base_url)
     end
 
-    it "should not touch non images" do
-      PrettyText.apply_cdn("<a href='/hello'>hello</a>","http://a.com").should ==
-        "<a href=\"/hello\">hello</a>"
+    it "adds base url to relative links" do
+      html = "<p><a class=\"mention\" href=\"/users/wiseguy\">@wiseguy</a>, <a class=\"mention\" href=\"/users/trollol\">@trollol</a> what do you guys think? </p>"
+      output = described_class.make_all_links_absolute(html)
+      output.should == "<p><a class=\"mention\" href=\"#{base_url}/users/wiseguy\">@wiseguy</a>, <a class=\"mention\" href=\"#{base_url}/users/trollol\">@trollol</a> what do you guys think? </p>"
     end
 
-    it "should not touch schemaless links" do
-      PrettyText.apply_cdn("<a href='//hello'>hello</a>","http://a.com").should ==
-        "<a href=\"//hello\">hello</a>"
+    it "doesn't change external absolute links" do
+      html = "<p>Check out <a href=\"http://mywebsite.com/users/boss\">this guy</a>.</p>"
+      described_class.make_all_links_absolute(html).should == html
+    end
+
+    it "doesn't change internal absolute links" do
+      html = "<p>Check out <a href=\"#{base_url}/users/boss\">this guy</a>.</p>"
+      described_class.make_all_links_absolute(html).should == html
+    end
+
+    it "can tolerate invalid URLs" do
+      html = "<p>Check out <a href=\"not a real url\">this guy</a>.</p>"
+      expect { described_class.make_all_links_absolute(html) }.to_not raise_error
     end
   end
+
 end

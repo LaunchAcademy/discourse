@@ -181,6 +181,26 @@ describe Guardian do
     end
   end
 
+  describe 'can_invite_to_forum?' do
+    let(:user) { Fabricate.build(:user) }
+    let(:moderator) { Fabricate.build(:moderator) }
+
+    it "doesn't allow anonymous users to invite" do
+      Guardian.new.can_invite_to_forum?.should be_false
+    end
+
+    it 'returns true when the site requires approving users and is mod' do
+      SiteSetting.expects(:must_approve_users?).returns(true)
+      Guardian.new(moderator).can_invite_to_forum?.should be_true
+    end
+
+    it 'returns false when the site requires approving users and is regular' do
+      SiteSetting.expects(:must_approve_users?).returns(true)
+      Guardian.new(user).can_invite_to_forum?.should be_false
+    end
+
+  end
+
   describe 'can_invite_to?' do
     let(:topic) { Fabricate(:topic) }
     let(:user) { topic.user }
@@ -198,7 +218,7 @@ describe Guardian do
       Guardian.new(moderator).can_invite_to?(topic).should be_true
     end
 
-    it 'returns true when the site requires approving users and is regular' do
+    it 'returns false when the site requires approving users and is regular' do
       SiteSetting.expects(:must_approve_users?).returns(true)
       Guardian.new(coding_horror).can_invite_to?(topic).should be_false
     end
@@ -782,21 +802,21 @@ describe Guardian do
 
     end
 
-    context 'can_ban?' do
-      it 'returns false when a user tries to ban another user' do
-        Guardian.new(user).can_ban?(coding_horror).should be_false
+    context 'can_suspend?' do
+      it 'returns false when a user tries to suspend another user' do
+        Guardian.new(user).can_suspend?(coding_horror).should be_false
       end
 
-      it 'returns true when an admin tries to ban another user' do
-        Guardian.new(admin).can_ban?(coding_horror).should be_true
+      it 'returns true when an admin tries to suspend another user' do
+        Guardian.new(admin).can_suspend?(coding_horror).should be_true
       end
 
-      it 'returns true when a moderator tries to ban another user' do
-        Guardian.new(moderator).can_ban?(coding_horror).should be_true
+      it 'returns true when a moderator tries to suspend another user' do
+        Guardian.new(moderator).can_suspend?(coding_horror).should be_true
       end
 
-      it 'returns false when staff tries to ban staff' do
-        Guardian.new(admin).can_ban?(moderator).should be_false
+      it 'returns false when staff tries to suspend staff' do
+        Guardian.new(admin).can_suspend?(moderator).should be_false
       end
     end
 
@@ -1169,7 +1189,7 @@ describe Guardian do
       let(:target_user) { build(:user, created_at: 1.minute.ago) }
       include_examples "staff can always change usernames"
 
-      it "is true for the user to change his own username" do
+      it "is true for the user to change their own username" do
         Guardian.new(target_user).can_edit_username?(target_user).should be_true
       end
     end
@@ -1183,7 +1203,7 @@ describe Guardian do
 
       context 'with no posts' do
         include_examples "staff can always change usernames"
-        it "is true for the user to change his own username" do
+        it "is true for the user to change their own username" do
           Guardian.new(target_user).can_edit_username?(target_user).should be_true
         end
       end
@@ -1191,7 +1211,7 @@ describe Guardian do
       context 'with posts' do
         before { target_user.stubs(:post_count).returns(1) }
         include_examples "staff can always change usernames"
-        it "is false for the user to change his own username" do
+        it "is false for the user to change their own username" do
           Guardian.new(target_user).can_edit_username?(target_user).should be_false
         end
       end
@@ -1204,7 +1224,7 @@ describe Guardian do
 
       include_examples "staff can always change usernames"
 
-      it "is false for the user to change his own username" do
+      it "is false for the user to change their own username" do
         Guardian.new(user).can_edit_username?(user).should be_false
       end
     end
@@ -1224,7 +1244,7 @@ describe Guardian do
         Guardian.new(build(:user)).can_edit_email?(build(:user, created_at: 1.minute.ago)).should be_false
       end
 
-      it "is true for a regular user to edit his own email" do
+      it "is true for a regular user to edit their own email" do
         Guardian.new(user).can_edit_email?(user).should be_true
       end
 
@@ -1250,7 +1270,7 @@ describe Guardian do
         Guardian.new(build(:user)).can_edit_email?(build(:user, created_at: 1.minute.ago)).should be_false
       end
 
-      it "is false for a regular user to edit his own email" do
+      it "is false for a regular user to edit their own email" do
         Guardian.new(user).can_edit_email?(user).should be_false
       end
 

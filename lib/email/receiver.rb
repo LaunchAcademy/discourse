@@ -26,7 +26,7 @@ module Email
       return Email::Receiver.results[:unprocessable] if @body.blank?
 
       # Then run the github EmailReplyParser on it in case we didn't catch it
-      @body = EmailReplyParser.read(@body).visible_text
+      @body = EmailReplyParser.read(@body).visible_text.force_encoding('UTF-8')
 
       discourse_email_parser
 
@@ -72,6 +72,13 @@ module Email
       end
 
       @body = @message.body.to_s.strip
+
+      # Certain trigger phrases that means we didn't parse correctly
+      @body = nil if @body =~ /Content\-Type\:/ ||
+                     @body =~ /multipart\/alternative/ ||
+                     @body =~ /text\/plain/
+
+      @body
     end
 
     def scrub_html(html)

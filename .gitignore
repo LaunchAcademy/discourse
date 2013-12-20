@@ -11,6 +11,7 @@ tags
 dump.rdb
 
 .sass-cache/*
+public/plugins/*
 
 # Ignore bundler config
 /bin
@@ -36,6 +37,7 @@ config/discourse.pill
 /tmp
 /plugins
 /logfile
+log/
 
 /spec/fixtures/plugins/my_plugin/auto_generated
 
@@ -89,3 +91,5 @@ config/version.rb
 .ruby-gemset
 .rbenv
 bundler_stubs/*
+
+vendor/bundle/*

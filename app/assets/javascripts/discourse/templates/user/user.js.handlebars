@@ -4,9 +4,9 @@
     <section class='user-navigation'>
 
       <ul class='action-list nav-stacked'>
-        {{activityFilter count=statsCountNonPM user=model}}
+        {{discourse-activity-filter count=statsCountNonPM user=model userActionType=userActionType indexStream=indexStream}}
         {{#each stat in statsExcludingPms}}
-          {{activityFilter content=stat user=model}}
+          {{discourse-activity-filter content=stat user=model userActionType=userActionType indexStream=indexStream}}
         {{/each}}
       </ul>
 
@@ -42,6 +42,14 @@
           <h2>{{name}}</h2>
 
           <div class='bio'>{{{bio_excerpt}}}</div>
+
+          {{#if isSuspended}}
+            <div class='suspended'>
+              <i class='icon icon-ban-circle'></i>
+              <b>{{i18n user.suspended_notice date="suspendedTillDate"}}</b><br/>
+              <b>{{i18n user.suspended_reason}}</b> {{suspend_reason}}
+            </div>
+          {{/if}}
           </div>
 
           <div class='secondary'>

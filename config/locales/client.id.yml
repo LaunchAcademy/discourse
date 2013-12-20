@@ -162,7 +162,7 @@ id:
         user: "Invited User"
         none: "{{username}} hasn't invited any users to the site."
         redeemed: "Redeemed Invites"
-        redeemed_at: "Redeemed At"
+        redeemed_at: "Redeemed"
         pending: "Pending Invites"
         topics_entered: "Topics Entered"
         posts_read_count: "Posts Read"
@@ -206,10 +206,9 @@ id:
     unmute: Unmute
     last_post: Last post
 
-    best_of:
-      title: "Best Of"
-      description: "There are <b>{{count}}</b> posts in this topic. That's a lot! Would you like to save time by showing only the best posts?"
-      button: 'Switch to "Best Of" view'
+    summary:
+      description: "There are <b>{{count}}</b> posts in this topic. That's a lot! Would you like to save time by showing only the most relevant posts?"
+      button: 'Switch to "Summary" view'
 
     private_message_info:
       title: "Private Message"
@@ -217,7 +216,7 @@ id:
 
     email: 'Email'
     username: 'Username'
-    last_seen: 'Last Seen'
+    last_seen: 'Seen'
     created: 'Created'
     trust_level: 'Trust Level'
 
@@ -349,7 +348,6 @@ id:
         category: "There are no more {{category}} topics."
 
     topic:
-      create_in: 'Create {{categoryName}} Topic'
       create: 'Create Topic'
       create_long: 'Create a new Topic'
       private_message: 'Start a private message'
@@ -464,7 +462,7 @@ id:
 
       filters:
         user: "You're viewing only posts by specific user(s)."
-        best_of: "You're viewing only the 'Best Of' posts."
+        summary: "You're viewing only the 'Summary' posts."
         cancel: "Show all posts in this topic again."
 
       move_selected:
@@ -573,7 +571,7 @@ id:
         more: "{{n}} to go..."
         left: "{{n}} remaining"
 
-    topic_summary:
+    topic_map:
       title: "Topic Summary"
       links_shown: "show all {{totalLinks}} links..."
 
@@ -595,7 +593,7 @@ id:
     views_long: "this topic has been viewed {{number}} times"
     activity: "Activity"
     likes: "Likes"
-    top_contributors: "Participants"
+    users: "Users"
     category_title: "Category"
     history: "History"
 
@@ -639,6 +637,7 @@ id:
 
   # This section is exported to the javascript for i18n in the admin section
   admin_js:
+    type_to_filter: "type to filter..."
 
     admin:
       title: 'Discourse Admin'
@@ -726,13 +725,13 @@ id:
           other: "approve users ({{count}})"
 
       user:
-        ban_failed: "Something went wrong banning this user {{error}}"
-        unban_failed: "Something went wrong unbanning this user {{error}}"
-        ban_duration: "How long would you like to ban the user for? (days)"
+        suspend_failed: "Something went wrong banning this user {{error}}"
+        unsuspend_failed: "Something went wrong unbanning this user {{error}}"
+        suspend_duration: "How long would you like to ban the user for? (days)"
         delete_all_posts: "Delete all posts"
-        ban: "Ban"
-        unban: "Unban"
-        banned: "Banned?"
+        suspend: "Ban"
+        unsuspend: "Unban"
+        suspended: "Banned?"
         moderator: "Moderator?"
         admin: "Admin?"
         show_admin_profile: "Admin"

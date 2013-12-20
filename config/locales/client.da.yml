@@ -212,8 +212,7 @@ da:
     unmute: Unmute
     last_post: Sidste indlæg
 
-    best_of:
-      title: "Topindlæg"
+    summary:
       description: "Der er <b>{{count}}</b> indlæg i dette emne. Det er mange! Vil du gerne spare lidt tid, ved kun at se de indlæg der har flest interaktioner og svar?"
       button: 'Vis kun “Topindlæg”'
 
@@ -385,7 +384,6 @@ da:
         category: "Der er ikke flere emner i kategorien {{category}}."
 
     topic:
-      create_in: 'Opret emne i kategorien {{categoryName}}'
       create: 'Opret emne'
       create_long: 'Opret et nyt emne i debatten'
       private_message: 'Start en privat samtale'
@@ -503,7 +501,7 @@ da:
 
       filters:
         user: "Du ser kun endlæg fra specifikke brugere."
-        best_of: "Du ser kun “Topindlæg”."
+        summary: "Du ser kun “Topindlæg”."
         cancel: "Se alle indlæg i emnet."
 
       move_selected:
@@ -617,7 +615,7 @@ da:
         more: "{{n}} to go..."
         left: "{{n}} remaining"
 
-    topic_summary:
+    topic_map:
       title: "Topic Summary"
       links_shown: "show all {{totalLinks}} links..."
 
@@ -639,7 +637,7 @@ da:
     views_long: "dette emne er blevet vist {{number}} gange"
     activity: "Aktivitet"
     likes: "Synes godt om"
-    top_contributors: "Deltagere"
+    users: "Deltagere"
     category_title: "Kategori"
     history: "Historik"
     changed_by: "af {{author}}"
@@ -684,6 +682,7 @@ da:
 
   # This section is exported to the javascript for i18n in the admin section
   admin_js:
+    type_to_filter: "type to filter..."
 
     admin:
       title: 'Discourse Admin'
@@ -791,13 +790,13 @@ da:
           other: "approve users ({{count}})"
 
       user:
-        ban_failed: "Something went wrong banning this user {{error}}"
-        unban_failed: "Something went wrong unbanning this user {{error}}"
-        ban_duration: "How long would you like to ban the user for? (days)"
+        suspend_failed: "Something went wrong banning this user {{error}}"
+        unsuspend_failed: "Something went wrong unbanning this user {{error}}"
+        suspend_duration: "How long would you like to ban the user for? (days)"
         delete_all_posts: "Delete all posts"
-        ban: "Ban"
-        unban: "Unban"
-        banned: "Banned?"
+        suspend: "Ban"
+        unsuspend: "Unban"
+        suspended: "Banned?"
         moderator: "Moderator?"
         admin: "Admin?"
         show_admin_profile: "Admin"

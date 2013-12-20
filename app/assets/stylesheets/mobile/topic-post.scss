@@ -126,11 +126,7 @@ a.star {
 	text-shadow: none !important;
 }
 
-.profiler-results {
-  display: none;
-}
-
-.topic-summary {
+.topic-map {
 
   .btn {
     border-radius: 0 4px 0 4px;
@@ -190,9 +186,13 @@ a.star {
     margin-right: 4px;
   }
 
-  .summary {
-    &.collapsed {
+  .map-collapsed {
+    .secondary {
+      display: none;
     }
+  }
+
+  .map {
     li {
       float: left;
       padding: 7px 11px;
@@ -200,9 +200,7 @@ a.star {
         border-right: 0;
       }
     }
-    a,
-
-    .number {
+    a, .number {
       font-weight: bold;
       line-height: 20px;
     }

@@ -134,20 +134,19 @@ Discourse.EditCategoryController = Discourse.ObjectController.extend(Discourse.M
 
       this.set('saving', true);
       model.set('parentCategory', parentCategory);
-      var newSlug = Discourse.Category.slugFor(this.get('model'));
 
+      self.set('saving', false);
       this.get('model').save().then(function(result) {
-        // success
         self.send('closeModal');
-        Discourse.URL.redirectTo("/category/" + newSlug);
-      }, function(error) {
+        model.setProperties({slug: result.category.slug, id: result.category.id });
+        Discourse.URL.redirectTo("/category/" + Discourse.Category.slugFor(model));
 
+      }).fail(function(error) {
         if (error && error.responseText) {
           self.flash($.parseJSON(error.responseText).errors[0]);
         } else {
           self.flash(I18n.t('generic_error'));
         }
-
         self.set('saving', false);
       });
     },

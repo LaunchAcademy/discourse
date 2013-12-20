@@ -8,9 +8,11 @@ require_dependency 'post_destroyer'
 require_dependency 'user_name_suggester'
 require_dependency 'roleable'
 require_dependency 'pretty_text'
+require_dependency 'url_helper'
 
 class User < ActiveRecord::Base
   include Roleable
+  include UrlHelper
 
   has_many :posts
   has_many :notifications, dependent: :destroy
@@ -28,7 +30,7 @@ class User < ActiveRecord::Base
   has_many :user_visits, dependent: :destroy
   has_many :invites, dependent: :destroy
   has_many :topic_links, dependent: :destroy
-  has_many :uploads, dependent: :destroy
+  has_many :uploads
 
   has_one :facebook_user_info, dependent: :destroy
   has_one :twitter_user_info, dependent: :destroy
@@ -46,6 +48,8 @@ class User < ActiveRecord::Base
   has_one :api_key, dependent: :destroy
 
   belongs_to :uploaded_avatar, class_name: 'Upload', dependent: :destroy
+
+  delegate :last_sent_email_address, :to => :email_logs
 
   validates_presence_of :username
   validate :username_validator
@@ -78,8 +82,8 @@ class User < ActiveRecord::Base
   attr_accessor :notification_channel_position
 
   scope :blocked, -> { where(blocked: true) } # no index
-  scope :banned, -> { where('banned_till IS NOT NULL AND banned_till > ?', Time.zone.now) } # no index
-  scope :not_banned, -> { where('banned_till IS NULL') }
+  scope :suspended, -> { where('suspended_till IS NOT NULL AND suspended_till > ?', Time.zone.now) } # no index
+  scope :not_suspended, -> { where('suspended_till IS NULL') }
   # excluding fake users like the community user
   scope :real, -> { where('id > 0') }
 
@@ -276,7 +280,6 @@ class User < ActiveRecord::Base
     end
   end
 
-
   def update_last_seen!(now=Time.zone.now)
     now_date = now.to_date
     # Only update last seen once every minute
@@ -300,20 +303,20 @@ class User < ActiveRecord::Base
   #   - emails
   def small_avatar_url
     template = avatar_template
-    template.gsub("{size}", "45")
+    schemaless template.gsub("{size}", "45")
   end
 
   # the avatars might take a while to generate
   # so return the url of the original image in the meantime
   def uploaded_avatar_path
     return unless SiteSetting.allow_uploaded_avatars? && use_uploaded_avatar
-    uploaded_avatar_template.present? ? uploaded_avatar_template : uploaded_avatar.try(:url)
+    avatar_template = uploaded_avatar_template.present? ? uploaded_avatar_template : uploaded_avatar.try(:url)
+    schemaless avatar_template
   end
 
   def avatar_template
     uploaded_avatar_path || User.gravatar_template(email)
   end
-
 
   # The following count methods are somewhat slow - definitely don't use them in a loop.
   # They might need to be denormalized
@@ -356,8 +359,16 @@ class User < ActiveRecord::Base
     end
   end
 
-  def is_banned?
-    banned_till && banned_till > DateTime.now
+  def suspended?
+    suspended_till && suspended_till > DateTime.now
+  end
+
+  def suspend_record
+    UserHistory.for(self, :suspend_user).order('id DESC').first
+  end
+
+  def suspend_reason
+    suspend_record.try(:details) if suspended?
   end
 
   # Use this helper to determine if the user has a particular trust level.
@@ -465,9 +476,9 @@ class User < ActiveRecord::Base
     created_at > 1.day.ago
   end
 
-  def update_avatar(upload)
+  def upload_avatar(avatar)
     self.uploaded_avatar_template = nil
-    self.uploaded_avatar = upload
+    self.uploaded_avatar = avatar
     self.use_uploaded_avatar = true
     self.save!
   end
@@ -483,6 +494,10 @@ class User < ActiveRecord::Base
 
   def revoke_api_key
     ApiKey.where(user_id: self.id).delete_all
+  end
+
+  def find_email
+    last_sent_email_address || email
   end
 
   protected
@@ -566,7 +581,6 @@ class User < ActiveRecord::Base
     end
   end
 
-
   private
 
   def previous_visit_at_update_required?(timestamp)
@@ -615,8 +629,8 @@ end
 #  approved_at                   :datetime
 #  digest_after_days             :integer
 #  previous_visit_at             :datetime
-#  banned_at                     :datetime
-#  banned_till                   :datetime
+#  suspended_at                  :datetime
+#  suspended_till                :datetime
 #  date_of_birth                 :date
 #  auto_track_topics_after_msecs :integer
 #  views                         :integer          default(0), not null
